@@ -1,7 +1,7 @@
 -- Take in the size and output all possible grids
 
 import Control.Monad (replicateM)
-import Nonogram (Grid(..), storeGrid)
+import Nonogram (Grid(Grid), storeGrid)
 
 allBool :: [Bool]
 allBool = [False, True]
