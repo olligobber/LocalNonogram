@@ -26,7 +26,7 @@ exe/fullclean: exe/clean
 	-rmdir build
 	-rmdir exe
 
-ghc_command = ghc -i"src" -outputdir build -Wno-tabs -O
+ghc_command = ghc -i"src" -outputdir build -Wall -Wno-tabs -O
 
 exe/allGrids: src/allGrids.hs src/Nonogram.hs
 	-mkdir exe
@@ -38,7 +38,7 @@ exe/makeHints: src/makeHints.hs src/Nonogram.hs
 	-mkdir build
 	$(ghc_command) src/makeHints.hs -o exe/makeHints
 
-exe/solveHints: src/solveHints.hs src/Nonogram.hs
+exe/solveHints: src/solveHints.hs src/Nonogram.hs src/SolveTools.hs
 	-mkdir exe
 	-mkdir build
 	$(ghc_command) src/solveHints.hs -o exe/solveHints
