@@ -14,7 +14,7 @@ fullclean: exe/fullclean data/fullclean
 # Executable make targets
 
 .PHONY: exe/all
-exe/all: exe/allGrids exe/makeHints
+exe/all: exe/allGrids exe/makeHints exe/solveHints
 
 .PHONY: exe/clean
 exe/clean:
@@ -38,6 +38,11 @@ exe/makeHints: src/makeHints.hs src/Nonogram.hs
 	-mkdir build
 	$(ghc_command) src/makeHints.hs -o exe/makeHints
 
+exe/solveHints: src/solveHints.hs src/Nonogram.hs
+	-mkdir exe
+	-mkdir build
+	$(ghc_command) src/solveHints.hs -o exe/solveHints
+
 # Data make targets
 
 .PHONY: data/all
@@ -56,8 +61,10 @@ data/%/all: \
 	data/%/allGrids \
 	data/%/allHints \
 	data/%/uniqueHints \
-	data/%/numUniqueHints
-
+	data/%/numUniqueHints \
+	data/%/uniqueHintSols \
+	data/%/numUniqueSolvable \
+	data/%/numUniqueUnsolvable
 	@true
 
 .PHONY: data/%/clean
@@ -94,3 +101,15 @@ data/%/uniqueHints: data/%/allHints
 .NOTINTERMEDIATE: data/%/numUniqueHints
 data/%/numUniqueHints: data/%/uniqueHints
 	wc -l < $< > $@
+
+.NOTINTERMEDIATE: data/%/uniqueHintSols
+data/%/uniqueHintSols: data/%/uniqueHints | exe/solveHints
+	exe/solveHints < $< > $@
+
+.NOTINTERMEDIATE: data/%/numUniqueSolvable
+data/%/numUniqueSolvable: data/%/uniqueHintSols
+	grep "1" < $< | wc -l > $@
+
+.NOTINTERMEDIATE: data/%/numUniqueUnsolvable
+data/%/numUniqueUnsolvable: data/%/uniqueHintSols
+	grep "2" < $< | wc -l > $@

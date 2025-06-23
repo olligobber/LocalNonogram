@@ -26,7 +26,13 @@ splitOn delim l = fst $ go (delim:l) where
 
 newtype Grid x =
 	Grid { getRows :: [[x]] }
-	deriving (Eq, Ord)
+	deriving (Eq, Ord, Show)
+
+instance Functor Grid where
+	fmap f (Grid g) = Grid $ fmap (fmap f) g
+
+instance Foldable Grid where
+	foldMap f (Grid g) = foldMap (foldMap f) g
 
 sizeFromGrid :: Grid x -> Int
 sizeFromGrid = length . getRows
@@ -56,7 +62,7 @@ parseGrid =
 
 data Hints =
 	Hints { rowHints :: [[Int]], colHints :: [[Int]] }
-	deriving (Eq, Ord)
+	deriving (Eq, Ord, Show)
 
 sizeFromHints :: Hints -> Int
 sizeFromHints = length . rowHints
@@ -70,9 +76,11 @@ storeHints hints = store rowHints <> "/" <> store colHints where
 parseHints :: String -> Hints
 parseHints string = Hints {rowHints, colHints} where
 	[rowString, colString] = splitOn '/' string
-	rowHints = parseOne rowString
-	colHints = parseOne colString
-	parseOne = fmap (fmap read . splitOn ',') . splitOn ';'
+	rowHints = parseAxis rowString
+	colHints = parseAxis colString
+	parseAxis = fmap parseHint . splitOn ';'
+	parseHint "" = []
+	parseHint xs = fmap read $ splitOn ',' $ xs
 
 hintOne :: [Bool] -> [Int]
 hintOne = fmap length . filter head . group
