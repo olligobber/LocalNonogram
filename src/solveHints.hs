@@ -7,11 +7,12 @@ import Prelude hiding (MonadFail, either, fail)
 import Data.Foldable (traverse_)
 import Nonogram
 	(Grid, Hints(rowHints, colHints), sizeFromHints, parseHints, hintOne)
-import SolveTools
+import SolveClass
 	( CellInfo(..), either
 	, MonadFail, fail
-	, StateGrid, readGrid, readCol, readRow, updateCol, updateRow, runOnBlank
+	, StateGrid, readGrid, readCol, readRow, updateCol, updateRow
 	)
+import SimpleGrid (runOnBlank)
 
 -- Given a line with partial information, get all lines with full information
 possibleLines :: [CellInfo] -> [[Bool]]

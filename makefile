@@ -38,7 +38,8 @@ exe/makeHints: src/makeHints.hs src/Nonogram.hs
 	-mkdir build
 	$(ghc_command) src/makeHints.hs -o exe/makeHints
 
-exe/solveHints: src/solveHints.hs src/Nonogram.hs src/SolveTools.hs
+exe/solveHints: src/solveHints.hs \
+	src/Nonogram.hs src/SolveClass.hs src/SimpleGrid.hs
 	-mkdir exe
 	-mkdir build
 	$(ghc_command) src/solveHints.hs -o exe/solveHints
