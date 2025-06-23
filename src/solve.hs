@@ -3,90 +3,114 @@
 	-- 1 if it is logically solvable (one solution)
 	-- 2 if it is not logically solvable (no idea how many solutions)
 
+import Prelude hiding (MonadFail, either, fail)
 import Data.List (elemIndex, (!!))
 import Nonogram (
-	Grid(Grid), getRow, getCol,
+	Grid(Grid, getRows), sizeFromGrid, getRow, getCol,
 	Hints(rowHints, colHints), sizeFromHints, parseHints
 	)
 
--- TODO refactor to use monads, this sucks
+-- Monad with support for simple failure
+-- `fail >>= x = fail`
+-- `x *> fail = fail`
+class Monad m => MonadFail m where
+	fail :: m x
+
+instance MonadFail Maybe where
+	fail = Nothing
+
+class Deduction x where
+	either :: x -> x -> x
+	both :: MonadFail m => x -> x -> m x
 
 data CellInfo = Full | Empty | Unknown deriving (Eq)
 
--- Merge data about two cells
-mergeCell :: CellInfo -> CellInfo -> Maybe CellInfo
-mergeCell a Unknown = Just a
-mergeCell Unknown a = Just a
-mergeCell a b
-	| a == b = Just a
-	| otherwise = Nothing
+instance Deduction CellInfo where
+	either Unknown _ = Unknown
+	either _ Unknown = Unknown
+	either a b
+		| a == b = a
+		| otherwise = Unknown
+	both Unknown b = pure b
+	both a Unknown = pure a
+	both a b
+		| a == b = pure a
+		| otherwise = fail
 
--- Merge data about two lines
-mergeLine :: [CellInfo] -> [CellInfo] -> Maybe [CellInfo]
-mergeLine [] [] = Just []
-mergeLine (a:as) (b:bs) = (:) <$> mergeCell a b <*> mergeLine as bs
+instance Deduction x => Deduction [x] where
+	either = zipWith either
+	both as bs = traverse (uncurry both) $ zip as bs
 
-type PartGrid = Grid CellInfo
+instance Deduction x => Deduction (Grid x) where
+	either (Grid g) (Grid h) = Grid $ either g h
+	both (Grid g) (Grid h) = Grid <$> both g h
 
--- Merge data about one row into a grid
-mergeRow :: [CellInfo] -> PartGrid -> Maybe PartGrid
+class Monad m => ReadGrid m where
+	readGrid :: m (Grid CellInfo)
+	readSize :: m Int
+	readSize = sizeFromGrid <$> readGrid
+	readRow :: Int -> m [CellInfo]
+	readRow n = getRow n <$> readGrid
+	readCol :: Int -> m [CellInfo]
+	readCol n = getCol n <$> readGrid
 
+class MonadFail m => WriteGrid m where
+	-- Updates use `both` from the `Deduction` class to merge new info into
+	-- existing info, possibly failing
+	updateRow :: Int -> [CellInfo] -> m ()
+	updateCol :: Int -> [CellInfo] -> m ()
+
+newtype SimpleGrid x = SimpleGrid {
+	runGrid :: Grid CellInfo -> Maybe (Grid CellInfo, x)
+	}
+
+instance Functor SimpleGrid where
+	fmap f (SimpleGrid s) = SimpleGrid $ fmap (fmap $ fmap f) s
+
+instance Applicative SimpleGrid where
+	pure x = SimpleGrid $ \g -> Just (g, x)
+	s <*> t = SimpleGrid $ \g -> do -- Maybe Monad
+		(h, f) <- runGrid s g
+		(i, x) <- runGrid t h
+		pure (i, f x)
+
+instance Monad SimpleGrid where
+	s >>= f = SimpleGrid $ \g -> do -- Maybe Monad
+		(h, x) <- runGrid s g
+		runGrid (f x) h
+
+instance MonadFail SimpleGrid where
+	fail = SimpleGrid $ pure Nothing
+
+instance ReadGrid SimpleGrid where
+	readGrid = SimpleGrid $ \g -> Just (g,g)
+
+replaceIndex :: Int -> [a] -> a -> [a]
+replaceIndex index xs x =
+	take index xs <>
+	[x] <>
+	drop (index + 1) xs
+
+instance WriteGrid SimpleGrid where
+	updateRow index row = SimpleGrid $ \g -> do -- Maybe Monad
+		newRow <- both (getRow index g) row
+		let
+			oldRows = getRows g
+			newRows = replaceIndex index oldRows newRow
+			newGrid = Grid newRows
+		pure (newGrid, ())
+	updateCol index col = SimpleGrid $ \g -> do -- Maybe Monad
+		newCol <- both (getCol index g) col
+		let
+			oldRows = getRows g
+			newRows = zipWith (replaceIndex index) oldRows newCol
+			newGrid = Grid newRows
+		pure (newGrid, ())
 
 -- Blank grid with nothing determined
-newGrid :: Int -> PartGrid
+newGrid :: Int -> Grid CellInfo
 newGrid size = Grid $ replicate size $ replicate size $ Unknown
 
--- Given hints for a line and the current state of the line,
--- output an inferred new line, or Nothing if there is a contradiction
-infer :: [Int] -> [CellInfo] -> Maybe [CellInfo]
-infer hints line =
-	case
-		(,) <$>
-		placeEarliest hints line <*>
-		placeEarliest (reverse hints) (reverse line)
-	of
-		Nothing -> Nothing
-		Just (earliestStarts, x) ->
-			let
-				size = length line
-				latestEnds = (\y -> size - 1 - y) <$> reverse x
-				hintData = zip3 hints earliestStarts latestEnds
-			in
-				Just $ fillBetween hintData line
+runOnBlank :: SimpleGrid x -> Int -> Maybe (Grid CellInfo, x)
+runOnBlank s n = runGrid s $ newGrid n
 
--- Given hints for a line and the current state of a line,
--- output the earliest start position for each hint segment,
--- or Nothing if there is a contradiction
-placeEarliest :: [Int] -> [CellInfo] -> Maybe [Int]
-placeEarliest [] _ = Just []
-placeEarliest (h:_) line | h > length line = Nothing
-placeEarliest [h] line
-	| h == length line && all (/= Empty) line = Just [0]
-	| h == length line = Nothing
-placeEarliest (h:_) line | h > length line + 1 = Nothing
-placeEarliest hs@(h:_) line | line !! h == Full =
-	fmap (fmap (+1)) $ placeEarliest hs $ tail line
-placeEarliest (h:hs) line = case elemIndex Empty (take h line) of
-	Just k -> placeEarliest (h:hs) $ drop k line
-	Nothing -> fmap ((0:) . fmap (+(h+1))) $ placeEarliest hs $ drop (h+1) line
-
-
--- Given a list of hints, each with a length, earliest start, and latest end
--- and a line, output a new inferred line
-fillBetween :: [(Int, Int, Int)] -> [CellInfo] -> [CellInfo]
-fillBetween [] line = line
-fillBetween hints@((_, start, _):_) line | start > 0 =
-	take start line <>
-	fillBetween (nudgeHint (-start) <$> hints) (drop start hint)
-fillBetween ((size, 0, end):hints) line | end == size =
-	replicate end Full <>
-	[Empty] <>
-	fillBetween (nudgeHint (-(end+1)) <$> hints) (drop (end+1) hint)
-fillBetween ((size, 0, end):hints) line | end >= 2 * size =
-	fillBetween hints line
-fillBetween ((size, 0, end):hints) line =
-
-
--- Offset a hint by an amount
-nudgeHint :: Int -> (Int, Int, Int) -> (Int, Int, Int)
-nudgeHint d (size, start, end) = (size, start + d, end + d)

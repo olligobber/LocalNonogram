@@ -10,10 +10,12 @@ module Nonogram
 	, sizeFromHints
 	, storeHints
 	, parseHints
+	, hintOne
+	, hintGrid
 	)
 where
 
-import Data.List (transpose, intercalate, (!!))
+import Data.List (transpose, intercalate, group, (!!))
 
 splitOn :: Eq a => a -> [a] -> [[a]]
 splitOn delim l = fst $ go (delim:l) where
@@ -71,3 +73,14 @@ parseHints string = Hints {rowHints, colHints} where
 	rowHints = parseOne rowString
 	colHints = parseOne colString
 	parseOne = fmap (fmap read . splitOn ',') . splitOn ';'
+
+hintOne :: [Bool] -> [Int]
+hintOne = fmap length . filter head . group
+
+hintAll :: [[Bool]] -> [[Int]]
+hintAll = fmap hintOne
+
+hintGrid :: Grid Bool -> Hints
+hintGrid grid = Hints { rowHints, colHints } where
+	rowHints = hintAll $ getRows grid
+	colHints = hintAll $ getCols grid
