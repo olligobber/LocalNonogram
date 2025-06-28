@@ -1,5 +1,5 @@
 module SimpleGrid
-	( SimpleGrid(SimpleGrid, runGrid)
+	( SimpleGrid
 	, runOnBlank
 	)
 where

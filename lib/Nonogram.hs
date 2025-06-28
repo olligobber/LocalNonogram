@@ -15,7 +15,7 @@ module Nonogram
 	)
 where
 
-import Data.List (transpose, intercalate, group, (!!))
+import Data.List (transpose, intercalate, group)
 
 splitOn :: Eq a => a -> [a] -> [[a]]
 splitOn delim l = fst $ go (delim:l) where
@@ -74,13 +74,15 @@ storeHints hints = store rowHints <> "/" <> store colHints where
 
 -- Read the stored hints
 parseHints :: String -> Hints
-parseHints string = Hints {rowHints, colHints} where
-	[rowString, colString] = splitOn '/' string
-	rowHints = parseAxis rowString
-	colHints = parseAxis colString
-	parseAxis = fmap parseHint . splitOn ';'
-	parseHint "" = []
-	parseHint xs = fmap read $ splitOn ',' $ xs
+parseHints string = case splitOn '/' string of
+	[rowString, colString] -> let
+		rowHints = parseAxis rowString
+		colHints = parseAxis colString
+		parseAxis = fmap parseHint . splitOn ';'
+		parseHint "" = []
+		parseHint xs = fmap read $ splitOn ',' $ xs
+		in Hints {rowHints, colHints}
+	_ -> error "Invalid hint string"
 
 hintOne :: [Bool] -> [Int]
 hintOne = fmap length . filter head . group

@@ -1,0 +1,54 @@
+cabal-version: 3.0
+name: SolvableNonogram
+version: 1.0.0
+synopsis:
+	The purpose of this project is to find nonograms with unique solutions that aren't solvable with certain solving logic.
+
+homepage: https://github.com/olligobber/SolvableNonogram
+author: olligobber
+maintainer: sirolligobbervii@yahoo.com.au
+build-type: Simple
+
+common options
+	ghc-options: -Wall -Wno-tabs -O -XNamedFieldPuns -XConstraintKinds
+
+library
+	import: options
+	exposed-modules:
+		Nonogram,
+		SolveClass,
+		SimpleGrid,
+	build-depends:
+		base ^>= 4.17.2.0,
+	hs-source-dirs: lib
+	default-language: Haskell2010
+
+executable allGrids
+	import: options
+	main-is: allGrids.hs
+	build-depends:
+		base ^>=4.17.2.0,
+		SolvableNonogram
+
+	hs-source-dirs: app
+	default-language: Haskell2010
+
+executable makeHints
+	import: options
+	main-is: makeHints.hs
+	build-depends:
+		base ^>=4.17.2.0,
+		SolvableNonogram
+
+	hs-source-dirs: app
+	default-language: Haskell2010
+
+executable solveHints
+	import: options
+	main-is: solveHints.hs
+	build-depends:
+		base ^>=4.17.2.0,
+		SolvableNonogram
+
+	hs-source-dirs: app
+	default-language: Haskell2010

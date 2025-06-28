@@ -1,5 +1,3 @@
-# SHELL := /bin/bash
-
 # Global make targets
 
 .PHONY: all
@@ -18,31 +16,23 @@ exe/all: exe/allGrids exe/makeHints exe/solveHints
 
 .PHONY: exe/clean
 exe/clean:
-	-rm build/*
+	cabal clean
 	-rm exe/*
 
 .PHONY: exe/fullclean
 exe/fullclean: exe/clean
-	-rmdir build
 	-rmdir exe
 
-ghc_command = ghc -i"src" -outputdir build -Wall -Wno-tabs -O
-
-exe/allGrids: src/allGrids.hs src/Nonogram.hs
+exe/allGrids exe/makeHints exe/solveHints &: \
+	app/allGrids.hs \
+	app/makeHints.hs \
+	app/solveHints.hs \
+	lib/Nonogram.hs \
+	lib/SolveClass.hs \
+	lib/SimpleGrid.hs \
+	SolvableNonogram.cabal
 	-mkdir exe
-	-mkdir build
-	$(ghc_command) src/allGrids.hs -o exe/allGrids
-
-exe/makeHints: src/makeHints.hs src/Nonogram.hs
-	-mkdir exe
-	-mkdir build
-	$(ghc_command) src/makeHints.hs -o exe/makeHints
-
-exe/solveHints: src/solveHints.hs \
-	src/Nonogram.hs src/SolveClass.hs src/SimpleGrid.hs
-	-mkdir exe
-	-mkdir build
-	$(ghc_command) src/solveHints.hs -o exe/solveHints
+	cabal install --install-method=copy --installdir=exe
 
 # Data make targets
 

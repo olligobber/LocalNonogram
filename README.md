@@ -6,7 +6,7 @@ The current approach for what is considered "unsolvable" is based on trying to m
 
 ## Dependencies
 
-Dependencies are kept minimal. Common bash utilities such as `make`, `sort`, `uniq`, and more are used. Also, `ghc` is used to compile haskell code. GHC version 9.4.7 was used, though other versions will probably work fine.
+Dependencies are kept minimal. Common bash utilities such as `make`, `sort`, `uniq`, and more are used. Also, `cabal` is used to compile haskell code. The cabal config file `SolvableNonogram.cabal` specifies versions of cabal and any libraries used.
 
 ## Building
 
@@ -36,7 +36,7 @@ A list of all data files follows:
 
 ## Executables
 
-The data is generated with a mixture of bash and haskell code. Bash code is contained in the makefile, and haskell code is contained in the `src` directory. Haskell code must be compiled before it is run, and the compiled executables are placed in the `exe` directory. Any helper files created during compilation are placed in the `build` directory, and may be reused if multiple haskell files rely on the same library. If the `exe` and `build` directories do not exist, they will be created.
+The data is generated with a mixture of bash and haskell code. Bash code is contained in the makefile, and haskell code is contained in the `app` and `lib` directories. Haskell code must be compiled before it is run, and the compiled executables are placed in the `exe` directory. Any helper files created during compilation are placed in the `dist-newstyle` directory. If the `exe` directory does not exist, it will be created.
 
 The makefile has a target `exe/all`. which compiles all of the haskell executables.
 
@@ -47,14 +47,14 @@ A list of haskell executables follows:
 
 ## Haskell Source Code
 
-Haskell code is contained in the `src` directory. So far this has no dependencies except what is included in GHC 9.4.7, and if that changes then either stack or cabal will be used to manage these.
+Haskell code for the executables is contained in the `app` directory, and general libraries that may be used by multiple executables are contained in the `lib` directory. Dependencies are managed by cabal, and can be seen in `SolvableNonogram.cabal`.
 
 Haskell is used because it makes the code easier to read and write, though it is very inefficient when lots of data is stored in memory. Thus for tasks that involve looking at the list of all nonograms as a whole, bash is used instead, and haskell code is written to operate on each nonogram independently.
 
 A list of haskell source files follows:
-* `src/Nonogram.hs`: This contains general definitions of nonogram grids and hints. This includes basic operations for conversion, extracting data, and writing and reading to files or the terminal, as well as generating hints from lines or grids of a puzzle.
-* `src/allGrids.hs`: This is the source for `exe/allGrids`. Thanks to lazy evaluation, the list of all grids it generates never has to be entirely stored in memory, as the tail of the list is generated as needed, and the head of the list can be discarded once printed.
-* `src/makeHints.hs`: This is the source for `exe/makeHints`. It contains a function to turn a grid into its hints, which is then applied to each line using `lines` and `unlines`, and then applied to standard input and output using `interact`. Using `lines`, `unlines`, and `interact` in this way means each line is computed independently, and so memory use is minimised.
-* `src/SolveClass.hs`: This contains general definitions useful for solving nonograms. This includes a class for deductions featuring methods for "either" and "both", classes for monads that support reading and updating the knowledge about the grid.
-* `src/SimpleGrid.hs`: This contains a simple and inefficient implementation of the monad in `src/SolveClass.hs` for reading and updating the knowledge about the grid.
-* `src/solveHints.hs`: This is the source for `exe/solveHints`. Similar to `src/makeHints.hs`, a function is used to solve each hint, which is then efficiently applied to each line.
+* `lib/Nonogram.hs`: This contains general definitions of nonogram grids and hints. This includes basic operations for conversion, extracting data, and writing and reading to files or the terminal, as well as generating hints from lines or grids of a puzzle.
+* `app/allGrids.hs`: This is the source for `exe/allGrids`. Thanks to lazy evaluation, the list of all grids it generates never has to be entirely stored in memory, as the tail of the list is generated as needed, and the head of the list can be discarded once printed.
+* `app/makeHints.hs`: This is the source for `exe/makeHints`. It contains a function to turn a grid into its hints, which is then applied to each line using `lines` and `unlines`, and then applied to standard input and output using `interact`. Using `lines`, `unlines`, and `interact` in this way means each line is computed independently, and so memory use is minimised.
+* `lib/SolveClass.hs`: This contains general definitions useful for solving nonograms. This includes a class for deductions featuring methods for "either" and "both", classes for monads that support reading and updating the knowledge about the grid.
+* `lib/SimpleGrid.hs`: This contains a simple and inefficient implementation of the monad in `lib/SolveClass.hs` for reading and updating the knowledge about the grid.
+* `app/solveHints.hs`: This is the source for `exe/solveHints`. Similar to `app/makeHints.hs`, a function is used to solve each hint, which is then efficiently applied to each line.
