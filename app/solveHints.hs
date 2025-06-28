@@ -12,7 +12,7 @@ import SolveClass
 	, MonadFail, fail
 	, StateGrid, readGrid, readCol, readRow, updateCol, updateRow
 	)
-import SimpleGrid (runOnBlank)
+import ArrayGrid (runOnBlank)
 
 -- Given a line with partial information, get all lines with full information
 possibleLines :: [CellInfo] -> [[Bool]]

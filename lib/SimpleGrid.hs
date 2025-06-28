@@ -4,7 +4,7 @@ module SimpleGrid
 	)
 where
 
-import Prelude hiding (MonadFail, either, fail)
+import Prelude hiding (MonadFail, fail)
 import Nonogram (Grid(Grid, getRows), getRow, getCol)
 import SolveClass
 	( MonadFail(fail)

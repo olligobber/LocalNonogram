@@ -10,7 +10,13 @@ maintainer: sirolligobbervii@yahoo.com.au
 build-type: Simple
 
 common options
-	ghc-options: -Wall -Wno-tabs -O -XNamedFieldPuns -XConstraintKinds
+	ghc-options:
+		-Wall
+		-Wno-tabs
+		-O
+		-XNamedFieldPuns
+		-XConstraintKinds
+		-XRankNTypes
 
 library
 	import: options
@@ -18,8 +24,10 @@ library
 		Nonogram,
 		SolveClass,
 		SimpleGrid,
+		ArrayGrid,
 	build-depends:
 		base ^>= 4.17.2.0,
+		array ^>= 0.5.8.0,
 	hs-source-dirs: lib
 	default-language: Haskell2010
 
