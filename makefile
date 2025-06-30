@@ -71,7 +71,7 @@ data/%/fullclean: data/%/clean
 data/%/size:
 	mkdir -p $(@D)
 	$(eval size = $(subst data/,,$(subst /size,,$@)))
-	@if [ $$(grep -c "[1-9][0-9]*"<<< "$(size)") -eq 0 ]; \
+	@if [ $$(grep -Ec "^(0|[1-9][0-9]*)$$" <<< "$(size)") -eq 0 ]; \
 	then \
 		echo "Cannot automatically determine size, as directory is not a number"; \
 		false; \
