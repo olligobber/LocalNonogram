@@ -14,10 +14,12 @@ common options
 		-Wall
 		-Wno-tabs
 		-O
-		-XNamedFieldPuns
-		-XConstraintKinds
-		-XRankNTypes
-		-XTypeApplications
+	default-extensions:
+		NamedFieldPuns
+		ConstraintKinds
+		RankNTypes
+		TypeApplications
+		ScopedTypeVariables
 
 library
 	import: options
@@ -26,6 +28,7 @@ library
 		SolveClass,
 		SimpleGrid,
 		ArrayGrid,
+		SolveLocally,
 	build-depends:
 		base ^>= 4.17.2.0,
 		array ^>= 0.5.8.0,

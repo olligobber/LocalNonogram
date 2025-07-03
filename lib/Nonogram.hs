@@ -34,6 +34,9 @@ instance Functor Grid where
 instance Foldable Grid where
 	foldMap f (Grid g) = foldMap (foldMap f) g
 
+instance Traversable Grid where
+	sequenceA (Grid g) = Grid <$> traverse sequenceA g
+
 sizeFromGrid :: Grid x -> Int
 sizeFromGrid = length . getRows
 

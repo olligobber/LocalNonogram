@@ -10,7 +10,7 @@ module SolveClass
 where
 
 import Prelude hiding (MonadFail, either, fail)
-import Nonogram (Grid(Grid, getRows), sizeFromGrid, getRow, getCol)
+import Nonogram (Grid(Grid), sizeFromGrid, getRow, getCol)
 
 -- Monad with support for simple failure
 -- `fail >>= x = fail`
