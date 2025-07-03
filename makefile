@@ -23,10 +23,11 @@ exe/clean:
 exe/fullclean: exe/clean
 	-rmdir exe
 
-exe/allGrids exe/makeHints exe/solveHints &: \
+exe/allGrids exe/makeHints exe/solveHints exe/numSolvable &: \
 	app/allGrids.hs \
 	app/makeHints.hs \
 	app/solveHints.hs \
+	app/numSolvable.hs \
 	lib/Nonogram.hs \
 	lib/SolveClass.hs \
 	lib/SimpleGrid.hs \

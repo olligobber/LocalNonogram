@@ -21,6 +21,8 @@ For 0x0 and 1x1 grids, any way of filling the grid will lead to unique hints, an
 ───┴─┴─┴─┴─┘
 ```
 
+This code is incredibly slow to run for large sizes, as it looks at every nxn grid, of which there are 2^(n^2), determines its hints, and attempts to apply inefficient logic to solve it. On a cheap laptop running `exe/numSolvable`, n=4 takes about 2 seconds, and n=5 takes about 42 minutes. My current estimate for n=6 is that it will take 31.9 years.
+
 ## Dependencies
 
 Dependencies are kept minimal. Common bash utilities such as `make`, `sort`, `uniq`, and more are used. Also, `cabal` is used to compile haskell code. The cabal config file `SolvableNonogram.cabal` specifies versions of cabal and any libraries used.
@@ -32,6 +34,10 @@ Run `make` to build all of the executables and compute all of the data. If you o
 Run `make clean` to delete all of the executables, data, and temporary files created in the build process, though the subdirectories of `data` will not be removed, so `make all` or `make data/all` will make their data again. To only delete the executables and temporary build files, you can run `make exe/clean`. To only delete data, you can run `make data/clean`, or to only remove data for a size n you can run `make data/<n>/clean`. Similar to `make clean`, this won't remove the actual subdirectories of `data`.
 
 Every `clean` make target has a matching `fullclean` target that removes the directories as well.
+
+## Running
+
+Most of the executables are expected to be run only when making data. `exe/numSolvable` is different though, instead it is simply run on its own, given a size via standard input, and outputs the count by standard output. For example, the bash command `exe/numSolvable <<< "4"` will output `51234`.
 
 ## Data
 
@@ -61,6 +67,7 @@ A list of haskell executables follows:
 * `exe/allGrids`: This is used to generate `data/<n>/allGrids`.
 * `exe/makeHints`: This is used to generate `data/<n>/allHints`.
 * `exe/solveHints`: This is used to generate `data/<n>/uniqueHintSols`.
+* `exe/numSolvable`: This executable is different as it is not used to generate a data file. Instead, it takes as input a size from standard input, and outputs the number of locally solvable nonograms of that size to standard output. This is the equivalent of making `data/<n>/numUniqueSolvable`, but does everything in one step, skipping the part where duplicate hints are removed as it is too memory intensive and not necessary.
 
 ## Haskell Source Code
 
@@ -77,3 +84,4 @@ A list of haskell source files follows:
 * `lib/ArrayGrid.hs`: This contains an array based implementation of the monad in `lib/SolveClass.hs` for reading and updating the knowledge about the grid.
 * `lib/SolveLocally.hs`: This contains the actual logic of solving the grid. It is implemented only using the classes from `lib/SolveClass.hs`, so the underlying implementation can be chosen later.
 * `app/solveHints.hs`: This is the source for `exe/solveHints`. Similar to `app/makeHints.hs`, a function is used to solve each hint, which is then efficiently applied to each line.
+* `app/numSolvable.hs`: This is the source for `exe/numSolvable`. Similar to `app/allGrids.hs`, it generates a list of all grids lazily, and is able to apply a map-reduce to figure out which are locally solvable without excessive memory use, and remarkably little code.
