@@ -66,10 +66,14 @@ isSolved = traverse $ \cell -> case cell of
 	Empty -> Just False
 	Unknown -> Nothing
 
+-- Given a proxy of a type used to implement stateful grid updates,
+-- and the hints for a problem, solve the grid using local logic.
+-- The proxy is needed so that the type m can be attached to a value,
+-- for some reason using a type application is not enough
 solveGrid :: forall m. (StateGrid m, RunGrid m) => Proxy m -> Hints -> Solution
 solveGrid _ hints =
 	case
-		runOnUnknown @m (solveGridM @m hints *> (readGrid @m)) $
+		runOnUnknown @m (solveGridM hints *> readGrid) $
 		sizeFromHints hints
 	of
 		Nothing -> Contradiction
