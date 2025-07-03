@@ -4,6 +4,7 @@ module SolveClass
 	, CellInfo(Full, Empty, Unknown)
 	, ReadGrid(readGrid, readSize, readRow, readCol)
 	, WriteGrid(updateRow, updateCol)
+	, RunGrid(runOnUnknown)
 	, StateGrid
 	)
 where
@@ -68,6 +69,10 @@ class Monad m => ReadGrid m where
 class MonadFail m => WriteGrid m where
 	updateRow :: Int -> [CellInfo] -> m ()
 	updateCol :: Int -> [CellInfo] -> m ()
+
+-- A class for running a grid solver on a square grid that starts all unknown
+class RunGrid m where
+	runOnUnknown :: m x -> Int -> Maybe x
 
 -- Both Read and Write in one convenient predicate
 type StateGrid m = (ReadGrid m, WriteGrid m)

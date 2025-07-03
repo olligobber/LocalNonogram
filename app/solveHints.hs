@@ -11,8 +11,9 @@ import SolveClass
 	( CellInfo(..), either
 	, MonadFail, fail
 	, StateGrid, readGrid, readCol, readRow, updateCol, updateRow
+	, runOnUnknown
 	)
-import ArrayGrid (runOnBlank)
+import ArrayGrid (ArrayGrid)
 
 -- Given a line with partial information, get all lines with full information
 possibleLines :: [CellInfo] -> [[Bool]]
@@ -60,9 +61,13 @@ isSolved = all (/= Unknown)
 	-- 1 if it is logically solvable (one solution)
 	-- 2 if it is not logically solvable (no idea how many solutions)
 solveGrid :: Hints -> Int
-solveGrid hints = case runOnBlank (solveGridM hints) $ sizeFromHints hints of
-	Nothing -> 0
-	Just (g, _) -> if isSolved g then 1 else 2
+solveGrid hints =
+	case
+		runOnUnknown (solveGridM hints *> readGrid @ArrayGrid) $
+		sizeFromHints hints
+	of
+		Nothing -> 0
+		Just g -> if isSolved g then 1 else 2
 
 main :: IO ()
 main = interact $ unlines . fmap (show . solveGrid . parseHints) . lines

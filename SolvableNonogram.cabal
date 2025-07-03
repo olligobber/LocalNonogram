@@ -17,6 +17,7 @@ common options
 		-XNamedFieldPuns
 		-XConstraintKinds
 		-XRankNTypes
+		-XTypeApplications
 
 library
 	import: options

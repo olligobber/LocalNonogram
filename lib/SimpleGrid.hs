@@ -1,7 +1,5 @@
 module SimpleGrid
-	( SimpleGrid
-	, runOnBlank
-	)
+	( SimpleGrid )
 where
 
 import Prelude hiding (MonadFail, fail)
@@ -12,6 +10,7 @@ import SolveClass
 	, CellInfo(Unknown)
 	, ReadGrid(readGrid)
 	, WriteGrid(updateRow, updateCol)
+	, RunGrid(runOnUnknown)
 	)
 
 newtype SimpleGrid x = SimpleGrid {
@@ -61,9 +60,8 @@ instance WriteGrid SimpleGrid where
 			newGrid = Grid newRows
 		pure (newGrid, ())
 
--- Blank grid with nothing determined
-blankGrid :: Int -> Grid CellInfo
-blankGrid size = Grid $ replicate size $ replicate size $ Unknown
-
-runOnBlank :: SimpleGrid x -> Int -> Maybe (Grid CellInfo, x)
-runOnBlank s n = runGrid s $ blankGrid n
+instance RunGrid SimpleGrid where
+	runOnUnknown s n =
+		fmap snd $
+		runGrid s $
+		Grid $ replicate n $ replicate n $ Unknown

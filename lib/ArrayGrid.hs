@@ -1,7 +1,5 @@
 module ArrayGrid
-	( ArrayGrid
-	, runOnBlank
-	)
+	( ArrayGrid )
 where
 
 import Prelude hiding (MonadFail, fail)
@@ -17,6 +15,7 @@ import SolveClass
 	, CellInfo(Unknown)
 	, ReadGrid(readGrid, readSize, readRow, readCol)
 	, WriteGrid(updateRow, updateCol)
+	, RunGrid(runOnUnknown)
 	)
 
 type GridPointers s = STArray s (Int, Int) CellInfo
@@ -78,8 +77,8 @@ instance WriteGrid ArrayGrid where
 	updateCol y vals =
 		traverse_ (\(x, val) -> modifyCell x y (both val)) $ zip [0..] vals
 
-runOnBlank :: ArrayGrid x -> Int -> Maybe (Grid CellInfo, x)
-runOnBlank a n = runST $ do -- ST Monad
-	p <- newArray ((0, 0), (n-1, n-1)) Unknown
-	runGrid (flip (,) <$> a <*> readGrid) p
+instance RunGrid ArrayGrid where
+	runOnUnknown a n = runST $ do -- ST Monad
+		p <- newArray ((0, 0), (n-1, n-1)) Unknown
+		runGrid a p
 
