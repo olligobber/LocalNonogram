@@ -75,4 +75,5 @@ A list of haskell source files follows:
 * `lib/SolveClass.hs`: This contains general definitions useful for solving nonograms. This includes a class for deductions featuring methods for "either" and "both", classes for monads that support reading and updating the knowledge about the grid.
 * `lib/SimpleGrid.hs`: This contains a simple and inefficient implementation of the monad in `lib/SolveClass.hs` for reading and updating the knowledge about the grid. This is mainly here as a demonstration of a simple implementation, and is not used in practice due to its inefficiency.
 * `lib/ArrayGrid.hs`: This contains an array based implementation of the monad in `lib/SolveClass.hs` for reading and updating the knowledge about the grid.
+* `lib/SolveLocally.hs`: This contains the actual logic of solving the grid. It is implemented only using the classes from `lib/SolveClass.hs`, so the underlying implementation can be chosen later.
 * `app/solveHints.hs`: This is the source for `exe/solveHints`. Similar to `app/makeHints.hs`, a function is used to solve each hint, which is then efficiently applied to each line.
