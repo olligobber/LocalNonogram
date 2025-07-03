@@ -31,6 +31,7 @@ exe/allGrids exe/makeHints exe/solveHints &: \
 	lib/SolveClass.hs \
 	lib/SimpleGrid.hs \
 	lib/ArrayGrid.hs \
+	lib/SolveLocally.hs \
 	SolvableNonogram.cabal
 	-mkdir exe
 	cabal install --install-method=copy --installdir=exe --overwrite-policy=always

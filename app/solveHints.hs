@@ -3,12 +3,13 @@
 	-- 1 if it is logically solvable (one solution)
 	-- 2 if it is not logically solvable (no idea how many solutions)
 
-import Nonogram (Hints)
+import Data.Proxy
+import Nonogram (Hints, parseHints)
 import ArrayGrid (ArrayGrid)
 import SolveLocally (Solution(..), solveGrid)
 
 solveAndOutput :: Hints -> Int
-solveAndOutput hints = case solveGrid @ArrayGrid hints of
+solveAndOutput hints = case solveGrid (Proxy @ArrayGrid) hints of
 	Contradiction -> 0
 	Solved _ -> 1
 	Unsolved _ -> 2

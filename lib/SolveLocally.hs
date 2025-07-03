@@ -6,6 +6,7 @@ where
 
 import Prelude hiding (MonadFail, either, fail)
 import Data.Foldable (traverse_)
+import Data.Proxy (Proxy)
 import Nonogram
 	(Grid, Hints(rowHints, colHints), sizeFromHints, parseHints, hintOne)
 import SolveClass
@@ -65,8 +66,8 @@ isSolved = traverse $ \cell -> case cell of
 	Empty -> Just False
 	Unknown -> Nothing
 
-solveGrid :: forall m. (ReadGrid m, WriteGrid m, RunGrid m) => Hints -> Solution
-solveGrid hints =
+solveGrid :: forall m. (StateGrid m, RunGrid m) => Proxy m -> Hints -> Solution
+solveGrid _ hints =
 	case
 		runOnUnknown @m (solveGridM @m hints *> (readGrid @m)) $
 		sizeFromHints hints
