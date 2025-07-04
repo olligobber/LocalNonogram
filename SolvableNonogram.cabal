@@ -1,10 +1,10 @@
 cabal-version: 3.0
-name: SolvableNonogram
+name: LocalNonogram
 version: 1.0.0
 synopsis:
-	The purpose of this project is to find nonograms with unique solutions that aren't solvable with certain solving logic.
+	The purpose of this project is to count nonograms aren't solvable with local solving logic.
 
-homepage: https://github.com/olligobber/SolvableNonogram
+homepage: https://github.com/olligobber/LocalNonogram
 author: olligobber
 maintainer: sirolligobbervii@yahoo.com.au
 build-type: Simple
@@ -40,7 +40,7 @@ executable allGrids
 	main-is: allGrids.hs
 	build-depends:
 		base ^>=4.17.2.0,
-		SolvableNonogram
+		LocalNonogram
 
 	hs-source-dirs: app
 	default-language: Haskell2010
@@ -50,7 +50,7 @@ executable makeHints
 	main-is: makeHints.hs
 	build-depends:
 		base ^>=4.17.2.0,
-		SolvableNonogram
+		LocalNonogram
 
 	hs-source-dirs: app
 	default-language: Haskell2010
@@ -60,7 +60,7 @@ executable solveHints
 	main-is: solveHints.hs
 	build-depends:
 		base ^>=4.17.2.0,
-		SolvableNonogram
+		LocalNonogram
 
 	hs-source-dirs: app
 	default-language: Haskell2010
@@ -70,7 +70,7 @@ executable numSolvable
 	main-is: numSolvable.hs
 	build-depends:
 		base ^>=4.17.2.0,
-		SolvableNonogram
+		LocalNonogram
 
 	hs-source-dirs: app
 	default-language: Haskell2010

@@ -1,4 +1,4 @@
-# SolvableNonogram
+# LocalNonogram
 
 The purpose of this project is to count the number of nonograms which are solvable with a particular solving system, which we will call **locally solvable** or solvable by **local logic**. This was inspired by [Pixelogic's "Every 5x5 Nonogram"](https://pixelogic.app/every-5x5-nonogram), which tries to get all 24976511 solvable 5x5 nonograms solved by a human. However, it is not clearly explained where this number of 5x5 nonograms came from. It is not simply the number of hints with a unique solution, as this number is documented by [OEIS sequence A242876](https://oeis.org/A242876), which says the number of 5x5 nonograms with a unique solution is 25309575, which differs from Pixelogic's number by 333064. Instead, this number comes from solving with local logic, explained in detail in the next paragraph. The number of locally solvable nonograms is not yet documented on the OEIS, but we know its first terms, for square grids of size 0 to 5, are 1, 2, 14, 384, 51234, 24976511. This project aims to find more terms for this and related sequences.
 
