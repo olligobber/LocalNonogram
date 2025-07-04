@@ -35,36 +35,6 @@ library
 	hs-source-dirs: lib
 	default-language: Haskell2010
 
-executable allGrids
-	import: options
-	main-is: allGrids.hs
-	build-depends:
-		base ^>=4.17.2.0,
-		LocalNonogram
-
-	hs-source-dirs: app
-	default-language: Haskell2010
-
-executable makeHints
-	import: options
-	main-is: makeHints.hs
-	build-depends:
-		base ^>=4.17.2.0,
-		LocalNonogram
-
-	hs-source-dirs: app
-	default-language: Haskell2010
-
-executable solveHints
-	import: options
-	main-is: solveHints.hs
-	build-depends:
-		base ^>=4.17.2.0,
-		LocalNonogram
-
-	hs-source-dirs: app
-	default-language: Haskell2010
-
 executable numSolvable
 	import: options
 	main-is: numSolvable.hs
