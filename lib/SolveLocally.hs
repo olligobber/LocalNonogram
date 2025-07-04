@@ -9,7 +9,7 @@ import Data.Foldable (traverse_)
 import Data.Proxy (Proxy)
 import Nonogram
 	( Grid, Vertical, Horizontal
-	, Hints(rowHints, colHints), widthFromHints, hintOne, fromWidth
+	, Hints(rowHints, colHints), widthFromHints, heightFromHints, hintOne
 	)
 import SolveClass
 	( CellInfo(..), either
@@ -78,8 +78,10 @@ isSolved = traverse $ \cell -> case cell of
 solveGrid :: forall m. (StateGrid m, RunGrid m) => Proxy m -> Hints -> Solution
 solveGrid _ hints =
 	case
-		runOnUnknown @m (solveGridM hints *> readGrid) $
-		fromWidth $ widthFromHints hints
+		runOnUnknown @m
+			(solveGridM hints *> readGrid)
+			(widthFromHints hints)
+			(heightFromHints hints)
 	of
 		Nothing -> Contradiction
 		Just g -> case isSolved g of

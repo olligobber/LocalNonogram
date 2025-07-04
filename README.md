@@ -21,7 +21,7 @@ For 0x0 and 1x1 grids, any way of filling the grid will lead to unique hints, an
 ───┴─┴─┴─┴─┘
 ```
 
-This code is incredibly slow to run for large sizes, as it looks at every nxn grid, of which there are 2^(n^2), determines its hints, and attempts to apply inefficient logic to solve it. On a cheap laptop, n=4 takes about 2 seconds, and n=5 takes about 42 minutes. My current estimate for n=6 is that it will take 31.9 years.
+This code is incredibly slow to run for large sizes, as it looks at every nxm grid, of which there are 2^(n*m), determines its hints, and attempts to apply inefficient logic to solve it. On a cheap laptop, 4x4 takes about 2 seconds, and 5x5 takes about 42 minutes. My current estimate for 6x6 is that it will take 31.9 years.
 
 ## Dependencies
 
@@ -29,7 +29,7 @@ Dependencies are kept minimal. `cabal` is used to compile haskell code. The caba
 
 ## Running
 
-Building and running the project is done using `cabal`. `cabal build` will build the project, `cabal run` will run it, and `cabal clean` will clean up the temporary build files. `cabal run` will also build the project if it is out of date. The executable takes a size from standard input, and then prints the count to standard output. For example, `cabal run <<< "4"` will print `51234`.
+Building and running the project is done using `cabal`. `cabal build` will build the project, `cabal run` will run it, and `cabal clean` will clean up the temporary build files. `cabal run` will also build the project if it is out of date. The executable takes a size from standard input, one value for a square and two for a rectangle, and then prints the count to standard output. For example, `cabal run <<< "4"` will print `51234`, and `cabal run <<< "2 5"` will print `810`.
 
 ## Haskell Source Code
 

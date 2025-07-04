@@ -3,7 +3,10 @@ module SimpleGrid
 where
 
 import Prelude hiding (MonadFail, fail)
-import Nonogram (Grid(Grid, getRows), fromVertical, fromHorizontal, getRow, getCol)
+import Nonogram
+	( Grid(Grid, getRows)
+	, fromVertical, fromHorizontal, getRow, getCol, fromWidth, fromHeight
+	)
 import SolveClass
 	( MonadFail(fail)
 	, both
@@ -62,7 +65,7 @@ instance WriteGrid SimpleGrid where
 		pure (newGrid, ())
 
 instance RunGrid SimpleGrid where
-	runOnUnknown s n =
+	runOnUnknown s w h =
 		fmap snd $
 		runGrid s $
-		Grid $ replicate n $ replicate n $ Unknown
+		Grid $ replicate (fromHeight h) $ replicate (fromWidth w) $ Unknown

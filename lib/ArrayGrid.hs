@@ -9,7 +9,7 @@ import Control.Monad.ST (ST, runST)
 import Data.Array.ST (STArray)
 import Data.Array.MArray (newArray, readArray, writeArray)
 import Nonogram
-	( Grid(Grid), Height(Height), Width(Width), Vertical, Horizontal
+	( Grid(Grid), Height, Width, Vertical, Horizontal
 	, firstHorizontal, firstVertical, lastHorizontal, lastVertical
 	)
 import SolveClass
@@ -95,10 +95,7 @@ instance WriteGrid ArrayGrid where
 		traverse_ (\(y, val) -> modifyCell x y (both val)) $ zip ys vals
 
 instance RunGrid ArrayGrid where
-	runOnUnknown a n = runST $ do -- ST Monad
-		let
-			w = Width n
-			h = Height n
+	runOnUnknown a w h = runST $ do -- ST Monad
 		p <- newArray
 			(
 				(firstHorizontal, firstVertical),

@@ -87,9 +87,9 @@ class MonadFail m => WriteGrid m where
 	updateRow :: Vertical -> [CellInfo] -> m ()
 	updateCol :: Horizontal -> [CellInfo] -> m ()
 
--- A class for running a grid solver on a square grid that starts all unknown
+-- A class for running a grid solver on a rectangular grid that starts all unknown
 class RunGrid m where
-	runOnUnknown :: m x -> Int -> Maybe x
+	runOnUnknown :: m x -> Width -> Height -> Maybe x
 
 -- Both Read and Write in one convenient predicate
 type StateGrid m = (ReadGrid m, WriteGrid m)
