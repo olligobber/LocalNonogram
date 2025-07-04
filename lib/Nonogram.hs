@@ -1,6 +1,8 @@
 module Nonogram
 	( Grid(Grid, getRows)
 	, sizeFromGrid
+	, Vertical(Vertical, fromVertical)
+	, Horizontal(Horizontal, fromHorizontal)
 	, getRow
 	, getCols
 	, getCol
@@ -16,6 +18,7 @@ module Nonogram
 where
 
 import Data.List (transpose, intercalate, group)
+import Data.Ix (Ix)
 
 splitOn :: Eq a => a -> [a] -> [[a]]
 splitOn delim l = fst $ go (delim:l) where
@@ -37,17 +40,23 @@ instance Foldable Grid where
 instance Traversable Grid where
 	sequenceA (Grid g) = Grid <$> traverse sequenceA g
 
+-- Coordinate systems so we don't mix up horizontal and vertical indices
+
+newtype Vertical = Vertical { fromVertical :: Int } deriving (Eq, Ord, Ix)
+
+newtype Horizontal = Horizontal { fromHorizontal :: Int } deriving (Eq, Ord, Ix)
+
 sizeFromGrid :: Grid x -> Int
 sizeFromGrid = length . getRows
 
-getRow :: Int -> Grid x -> [x]
-getRow n = (!! n) . getRows
+getRow :: Vertical -> Grid x -> [x]
+getRow n = (!! fromVertical n) . getRows
 
 getCols :: Grid x -> [[x]]
 getCols = transpose . getRows
 
-getCol :: Int -> Grid x -> [x]
-getCol n = fmap (!! n) . getRows
+getCol :: Horizontal -> Grid x -> [x]
+getCol n = fmap (!! fromHorizontal n) . getRows
 
 -- Store in a compact format
 storeGrid :: Grid Bool -> String

@@ -5,10 +5,12 @@ where
 import Prelude hiding (MonadFail, fail)
 import Data.Traversable (for)
 import Data.Foldable (traverse_)
+import Data.Ix (range)
 import Control.Monad.ST (ST, runST)
 import Data.Array.ST (STArray)
 import Data.Array.MArray (newArray, readArray, writeArray, getBounds)
-import Nonogram (Grid(Grid))
+import Nonogram
+	(Grid(Grid), Vertical(Vertical), Horizontal(Horizontal, fromHorizontal))
 import SolveClass
 	( MonadFail(fail)
 	, both
@@ -18,7 +20,7 @@ import SolveClass
 	, RunGrid(runOnUnknown)
 	)
 
-type GridPointers s = STArray s (Int, Int) CellInfo
+type GridPointers s = STArray s (Horizontal, Vertical) CellInfo
 
 newtype ArrayGrid x = ArrayGrid {
 	runGrid :: forall s. GridPointers s -> ST s (Maybe x)
@@ -45,13 +47,14 @@ instance Monad ArrayGrid where
 instance MonadFail ArrayGrid where
 	fail = ArrayGrid $ pure $ pure $ Nothing
 
-getCell :: Int -> Int -> ArrayGrid CellInfo
+getCell :: Horizontal -> Vertical -> ArrayGrid CellInfo
 getCell x y = ArrayGrid $ \p -> Just <$> readArray p (x,y)
 
-writeCell :: Int -> Int -> CellInfo -> ArrayGrid ()
+writeCell :: Horizontal -> Vertical -> CellInfo -> ArrayGrid ()
 writeCell x y val = ArrayGrid $ \p -> Just <$> writeArray p (x,y) val
 
-modifyCell :: Int -> Int -> (CellInfo -> ArrayGrid CellInfo) -> ArrayGrid ()
+modifyCell ::
+	Horizontal -> Vertical -> (CellInfo -> ArrayGrid CellInfo) -> ArrayGrid ()
 modifyCell x y f = do
 	oldVal <- getCell x y
 	newVal <- f oldVal
@@ -60,25 +63,32 @@ modifyCell x y f = do
 instance ReadGrid ArrayGrid where
 	readGrid = do
 		n <- readSize
-		Grid <$> for [0..n-1] (\x -> for [0..n-1] $ \y -> getCell x y)
+		Grid <$> for (range (Horizontal 0, Horizontal $ n-1)) ( \x ->
+			for (range (Vertical 0, Vertical $ n-1)) $ \y -> getCell x y)
 	readSize = ArrayGrid $ \p -> do
 		(_, (n, _)) <- getBounds p
-		pure $ pure $ n + 1
-	readRow x = do
+		pure $ pure $ fromHorizontal n + 1
+	readRow y = do
 		n <- readSize
-		for [0..n-1] (\y -> getCell x y)
-	readCol y = do
+		for (range (Horizontal 0, Horizontal $ n-1)) (\x -> getCell x y)
+	readCol x = do
 		n <- readSize
-		for [0..n-1] (\x -> getCell x y)
+		for (range (Vertical 0, Vertical $ n-1)) (\y -> getCell x y)
 
 instance WriteGrid ArrayGrid where
-	updateRow x vals =
-		traverse_ (\(y, val) -> modifyCell x y (both val)) $ zip [0..] vals
-	updateCol y vals =
-		traverse_ (\(x, val) -> modifyCell x y (both val)) $ zip [0..] vals
+	updateRow y vals = do
+		n <- readSize
+		traverse_ (\(x, val) -> modifyCell x y (both val)) $
+			zip (range (Horizontal 0, Horizontal $ n-1)) vals
+	updateCol x vals = do
+		n <- readSize
+		traverse_ (\(y, val) -> modifyCell x y (both val)) $
+			zip (range (Vertical 0, Vertical $ n-1)) vals
 
 instance RunGrid ArrayGrid where
 	runOnUnknown a n = runST $ do -- ST Monad
-		p <- newArray ((0, 0), (n-1, n-1)) Unknown
+		p <- newArray
+			((Horizontal 0, Vertical 0), (Horizontal $ n-1, Vertical $ n-1))
+			Unknown
 		runGrid a p
 

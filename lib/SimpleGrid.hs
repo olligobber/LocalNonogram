@@ -3,7 +3,7 @@ module SimpleGrid
 where
 
 import Prelude hiding (MonadFail, fail)
-import Nonogram (Grid(Grid, getRows), getRow, getCol)
+import Nonogram (Grid(Grid, getRows), fromVertical, fromHorizontal, getRow, getCol)
 import SolveClass
 	( MonadFail(fail)
 	, both
@@ -49,14 +49,15 @@ instance WriteGrid SimpleGrid where
 		newRow <- both (getRow index g) row
 		let
 			oldRows = getRows g
-			newRows = replaceIndex index oldRows newRow
+			newRows = replaceIndex (fromVertical index) oldRows newRow
 			newGrid = Grid newRows
 		pure (newGrid, ())
 	updateCol index col = SimpleGrid $ \g -> do -- Maybe Monad
 		newCol <- both (getCol index g) col
 		let
 			oldRows = getRows g
-			newRows = zipWith (replaceIndex index) oldRows newCol
+			newRows =
+				zipWith (replaceIndex $ fromHorizontal index) oldRows newCol
 			newGrid = Grid newRows
 		pure (newGrid, ())
 

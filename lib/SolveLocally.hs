@@ -6,13 +6,16 @@ where
 
 import Prelude hiding (MonadFail, either, fail)
 import Data.Foldable (traverse_)
+import Data.Ix (range)
 import Data.Proxy (Proxy)
 import Nonogram
-	(Grid, Hints(rowHints, colHints), sizeFromHints, parseHints, hintOne)
+	( Grid, Vertical(Vertical), Horizontal(Horizontal)
+	, Hints(rowHints, colHints), sizeFromHints, hintOne
+	)
 import SolveClass
 	( CellInfo(..), either
 	, MonadFail, fail
-	, ReadGrid, WriteGrid, StateGrid
+	, StateGrid
 	, readGrid, readCol, readRow, updateCol, updateRow
 	, RunGrid, runOnUnknown
 	)
@@ -32,17 +35,20 @@ deduceLine hint line = case filter ((== hint) . hintOne) $ possibleLines line of
 	[] -> fail
 	xs -> pure $ foldl1 either $ fmap (\b -> if b then Full else Empty) <$> xs
 
-deduceRow :: StateGrid m => [Int] -> Int -> m ()
+deduceRow :: StateGrid m => [Int] -> Vertical -> m ()
 deduceRow hint index = readRow index >>= deduceLine hint >>= updateRow index
 
-deduceCol :: StateGrid m => [Int] -> Int -> m ()
+deduceCol :: StateGrid m => [Int] -> Horizontal -> m ()
 deduceCol hint index = readCol index >>= deduceLine hint >>= updateCol index
 
 -- Update every row and column in a grid using their hints
 stepGrid :: StateGrid m => Hints -> m ()
 stepGrid hints = do
-	traverse_ (uncurry deduceRow) $ zip (rowHints hints) [0..]
-	traverse_ (uncurry deduceCol) $ zip (colHints hints) [0..]
+	let n = sizeFromHints hints
+	traverse_ (uncurry deduceRow) $ zip (rowHints hints) $
+		range (Vertical 0, Vertical $ n-1)
+	traverse_ (uncurry deduceCol) $ zip (colHints hints) $
+		range (Horizontal 0, Horizontal $ n-1)
 
 -- Solve a grid
 solveGridM :: StateGrid m => Hints -> m ()

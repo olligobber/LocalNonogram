@@ -10,7 +10,7 @@ module SolveClass
 where
 
 import Prelude hiding (MonadFail, either, fail)
-import Nonogram (Grid(Grid), sizeFromGrid, getRow, getCol)
+import Nonogram (Grid(Grid), Vertical, Horizontal, sizeFromGrid, getRow, getCol)
 
 -- Monad with support for simple failure
 -- `fail >>= x = fail`
@@ -58,17 +58,17 @@ class Monad m => ReadGrid m where
 	readGrid :: m (Grid CellInfo)
 	readSize :: m Int
 	readSize = sizeFromGrid <$> readGrid
-	readRow :: Int -> m [CellInfo]
+	readRow :: Vertical -> m [CellInfo]
 	readRow n = getRow n <$> readGrid
-	readCol :: Int -> m [CellInfo]
+	readCol :: Horizontal -> m [CellInfo]
 	readCol n = getCol n <$> readGrid
 
 -- A class for updating knowledge about the grid
 -- Updates use `both` from the `Deduction` class to merge new info into
 -- existing info, possibly failing
 class MonadFail m => WriteGrid m where
-	updateRow :: Int -> [CellInfo] -> m ()
-	updateCol :: Int -> [CellInfo] -> m ()
+	updateRow :: Vertical -> [CellInfo] -> m ()
+	updateCol :: Horizontal -> [CellInfo] -> m ()
 
 -- A class for running a grid solver on a square grid that starts all unknown
 class RunGrid m where
