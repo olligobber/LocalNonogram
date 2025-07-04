@@ -2,7 +2,9 @@ module SolveClass
 	( MonadFail(fail)
 	, Deduction(either, both)
 	, CellInfo(Full, Empty, Unknown)
-	, ReadGrid(readGrid, readSize, readRow, readCol)
+	, ReadGrid(readGrid, readHeight, readWidth, readRow, readCol)
+	, readColIndices
+	, readRowIndices
 	, WriteGrid(updateRow, updateCol)
 	, RunGrid(runOnUnknown)
 	, StateGrid
@@ -10,7 +12,10 @@ module SolveClass
 where
 
 import Prelude hiding (MonadFail, either, fail)
-import Nonogram (Grid(Grid), Vertical, Horizontal, sizeFromGrid, getRow, getCol)
+import Nonogram
+	( Grid(Grid), Vertical, Horizontal, Width, Height
+	, colIndices, rowIndices, widthFromGrid, heightFromGrid, getRow, getCol
+	)
 
 -- Monad with support for simple failure
 -- `fail >>= x = fail`
@@ -56,12 +61,24 @@ instance Deduction x => Deduction (Grid x) where
 -- A class for reading the current state of deductions about the grid
 class Monad m => ReadGrid m where
 	readGrid :: m (Grid CellInfo)
-	readSize :: m Int
-	readSize = sizeFromGrid <$> readGrid
+
+	readHeight :: m Height
+	readHeight = heightFromGrid <$> readGrid
+
+	readWidth :: m Width
+	readWidth = widthFromGrid <$> readGrid
+
 	readRow :: Vertical -> m [CellInfo]
 	readRow n = getRow n <$> readGrid
+
 	readCol :: Horizontal -> m [CellInfo]
 	readCol n = getCol n <$> readGrid
+
+readColIndices :: ReadGrid m => m [Horizontal]
+readColIndices = colIndices <$> readWidth
+
+readRowIndices :: ReadGrid m => m [Vertical]
+readRowIndices = rowIndices <$> readHeight
 
 -- A class for updating knowledge about the grid
 -- Updates use `both` from the `Deduction` class to merge new info into

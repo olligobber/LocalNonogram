@@ -6,17 +6,17 @@ where
 
 import Prelude hiding (MonadFail, either, fail)
 import Data.Foldable (traverse_)
-import Data.Ix (range)
 import Data.Proxy (Proxy)
 import Nonogram
-	( Grid, Vertical(Vertical), Horizontal(Horizontal)
-	, Hints(rowHints, colHints), sizeFromHints, hintOne
+	( Grid, Vertical, Horizontal
+	, Hints(rowHints, colHints), widthFromHints, hintOne, fromWidth
 	)
 import SolveClass
 	( CellInfo(..), either
 	, MonadFail, fail
 	, StateGrid
-	, readGrid, readCol, readRow, updateCol, updateRow
+	, readRowIndices, readColIndices, readGrid, readCol, readRow
+	, updateCol, updateRow
 	, RunGrid, runOnUnknown
 	)
 
@@ -44,11 +44,10 @@ deduceCol hint index = readCol index >>= deduceLine hint >>= updateCol index
 -- Update every row and column in a grid using their hints
 stepGrid :: StateGrid m => Hints -> m ()
 stepGrid hints = do
-	let n = sizeFromHints hints
-	traverse_ (uncurry deduceRow) $ zip (rowHints hints) $
-		range (Vertical 0, Vertical $ n-1)
-	traverse_ (uncurry deduceCol) $ zip (colHints hints) $
-		range (Horizontal 0, Horizontal $ n-1)
+	xs <- readColIndices
+	ys <- readRowIndices
+	traverse_ (uncurry deduceRow) $ zip (rowHints hints) ys
+	traverse_ (uncurry deduceCol) $ zip (colHints hints) xs
 
 -- Solve a grid
 solveGridM :: StateGrid m => Hints -> m ()
@@ -80,7 +79,7 @@ solveGrid :: forall m. (StateGrid m, RunGrid m) => Proxy m -> Hints -> Solution
 solveGrid _ hints =
 	case
 		runOnUnknown @m (solveGridM hints *> readGrid) $
-		sizeFromHints hints
+		fromWidth $ widthFromHints hints
 	of
 		Nothing -> Contradiction
 		Just g -> case isSolved g of

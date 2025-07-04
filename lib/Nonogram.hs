@@ -1,15 +1,25 @@
 module Nonogram
 	( Grid(Grid, getRows)
-	, sizeFromGrid
 	, Vertical(Vertical, fromVertical)
 	, Horizontal(Horizontal, fromHorizontal)
+	, Width(Width, fromWidth)
+	, Height(Height, fromHeight)
+	, firstHorizontal
+	, firstVertical
+	, lastHorizontal
+	, lastVertical
+	, rowIndices
+	, colIndices
+	, heightFromGrid
+	, widthFromGrid
 	, getRow
 	, getCols
 	, getCol
 	, storeGrid
 	, parseGrid
 	, Hints(Hints, colHints, rowHints)
-	, sizeFromHints
+	, heightFromHints
+	, widthFromHints
 	, storeHints
 	, parseHints
 	, hintOne
@@ -18,7 +28,7 @@ module Nonogram
 where
 
 import Data.List (transpose, intercalate, group)
-import Data.Ix (Ix)
+import Data.Ix (Ix, range)
 
 splitOn :: Eq a => a -> [a] -> [[a]]
 splitOn delim l = fst $ go (delim:l) where
@@ -46,8 +56,34 @@ newtype Vertical = Vertical { fromVertical :: Int } deriving (Eq, Ord, Ix)
 
 newtype Horizontal = Horizontal { fromHorizontal :: Int } deriving (Eq, Ord, Ix)
 
-sizeFromGrid :: Grid x -> Int
-sizeFromGrid = length . getRows
+newtype Height = Height { fromHeight :: Int }
+
+newtype Width = Width { fromWidth :: Int }
+
+firstVertical :: Vertical
+firstVertical = Vertical 0
+
+firstHorizontal :: Horizontal
+firstHorizontal = Horizontal 0
+
+lastVertical :: Height -> Vertical
+lastVertical (Height n) = Vertical $ n - 1
+
+lastHorizontal :: Width -> Horizontal
+lastHorizontal (Width n) = Horizontal $ n - 1
+
+rowIndices :: Height -> [Vertical]
+rowIndices h = range (firstVertical, lastVertical h)
+
+colIndices :: Width -> [Horizontal]
+colIndices w = range (firstHorizontal, lastHorizontal w)
+
+widthFromGrid :: Grid x -> Width
+widthFromGrid (Grid []) = Width 0
+widthFromGrid (Grid (x:_)) = Width $ length x
+
+heightFromGrid :: Grid x -> Height
+heightFromGrid = Height . length . getRows
 
 getRow :: Vertical -> Grid x -> [x]
 getRow n = (!! fromVertical n) . getRows
@@ -76,8 +112,11 @@ data Hints =
 	Hints { rowHints :: [[Int]], colHints :: [[Int]] }
 	deriving (Eq, Ord, Show)
 
-sizeFromHints :: Hints -> Int
-sizeFromHints = length . rowHints
+widthFromHints :: Hints -> Width
+widthFromHints = Width . length . colHints
+
+heightFromHints :: Hints -> Height
+heightFromHints = Height . length . rowHints
 
 -- Store in a compact format
 storeHints :: Hints -> String

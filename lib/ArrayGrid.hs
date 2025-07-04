@@ -5,25 +5,31 @@ where
 import Prelude hiding (MonadFail, fail)
 import Data.Traversable (for)
 import Data.Foldable (traverse_)
-import Data.Ix (range)
 import Control.Monad.ST (ST, runST)
 import Data.Array.ST (STArray)
-import Data.Array.MArray (newArray, readArray, writeArray, getBounds)
+import Data.Array.MArray (newArray, readArray, writeArray)
 import Nonogram
-	(Grid(Grid), Vertical(Vertical), Horizontal(Horizontal, fromHorizontal))
+	( Grid(Grid), Height(Height), Width(Width), Vertical, Horizontal
+	, firstHorizontal, firstVertical, lastHorizontal, lastVertical
+	)
 import SolveClass
 	( MonadFail(fail)
 	, both
 	, CellInfo(Unknown)
-	, ReadGrid(readGrid, readSize, readRow, readCol)
+	, ReadGrid(readGrid, readWidth, readHeight, readRow, readCol)
+	, readRowIndices, readColIndices
 	, WriteGrid(updateRow, updateCol)
 	, RunGrid(runOnUnknown)
 	)
 
-type GridPointers s = STArray s (Horizontal, Vertical) CellInfo
+data GridInfo s = GridInfo
+	{ gridHeight :: Height
+	, gridWidth :: Width
+	, arrayPointer :: STArray s (Horizontal, Vertical) CellInfo
+	}
 
 newtype ArrayGrid x = ArrayGrid {
-	runGrid :: forall s. GridPointers s -> ST s (Maybe x)
+	runGrid :: forall s. GridInfo s -> ST s (Maybe x)
 	}
 
 instance Functor ArrayGrid where
@@ -31,27 +37,28 @@ instance Functor ArrayGrid where
 
 instance Applicative ArrayGrid where
 	pure x = ArrayGrid $ pure $ pure $ pure x
-	a <*> b = ArrayGrid $ \p -> do -- ST Monad
-		runA <- runGrid a p
+	a <*> b = ArrayGrid $ \i -> do -- ST Monad
+		runA <- runGrid a i
 		case runA of
 			Nothing -> pure Nothing
-			Just f -> fmap f <$> runGrid b p
+			Just f -> fmap f <$> runGrid b i
 
 instance Monad ArrayGrid where
-	a >>= f = ArrayGrid $ \p -> do -- ST Monad
-		runA <- runGrid a p
+	a >>= f = ArrayGrid $ \i -> do -- ST Monad
+		runA <- runGrid a i
 		case runA of
 			Nothing -> pure Nothing
-			Just x -> runGrid (f x) p
+			Just x -> runGrid (f x) i
 
 instance MonadFail ArrayGrid where
 	fail = ArrayGrid $ pure $ pure $ Nothing
 
 getCell :: Horizontal -> Vertical -> ArrayGrid CellInfo
-getCell x y = ArrayGrid $ \p -> Just <$> readArray p (x,y)
+getCell x y = ArrayGrid $ \i -> Just <$> readArray (arrayPointer i) (x,y)
 
 writeCell :: Horizontal -> Vertical -> CellInfo -> ArrayGrid ()
-writeCell x y val = ArrayGrid $ \p -> Just <$> writeArray p (x,y) val
+writeCell x y val =
+	ArrayGrid $ \i -> Just <$> writeArray (arrayPointer i) (x,y) val
 
 modifyCell ::
 	Horizontal -> Vertical -> (CellInfo -> ArrayGrid CellInfo) -> ArrayGrid ()
@@ -62,33 +69,45 @@ modifyCell x y f = do
 
 instance ReadGrid ArrayGrid where
 	readGrid = do
-		n <- readSize
-		Grid <$> for (range (Horizontal 0, Horizontal $ n-1)) ( \x ->
-			for (range (Vertical 0, Vertical $ n-1)) $ \y -> getCell x y)
-	readSize = ArrayGrid $ \p -> do
-		(_, (n, _)) <- getBounds p
-		pure $ pure $ fromHorizontal n + 1
+		xs <- readColIndices
+		ys <- readRowIndices
+		Grid <$> for xs (\x -> for ys $ \y -> getCell x y)
+
+	readWidth = ArrayGrid $ \i -> pure $ pure $ gridWidth i
+
+	readHeight = ArrayGrid $ \i -> pure $ pure $ gridHeight i
+
 	readRow y = do
-		n <- readSize
-		for (range (Horizontal 0, Horizontal $ n-1)) (\x -> getCell x y)
+		xs <- readColIndices
+		for xs $ \x -> getCell x y
+
 	readCol x = do
-		n <- readSize
-		for (range (Vertical 0, Vertical $ n-1)) (\y -> getCell x y)
+		ys <- readRowIndices
+		for ys $ \y -> getCell x y
 
 instance WriteGrid ArrayGrid where
 	updateRow y vals = do
-		n <- readSize
-		traverse_ (\(x, val) -> modifyCell x y (both val)) $
-			zip (range (Horizontal 0, Horizontal $ n-1)) vals
+		xs <- readColIndices
+		traverse_ (\(x, val) -> modifyCell x y (both val)) $ zip xs vals
+
 	updateCol x vals = do
-		n <- readSize
-		traverse_ (\(y, val) -> modifyCell x y (both val)) $
-			zip (range (Vertical 0, Vertical $ n-1)) vals
+		ys <- readRowIndices
+		traverse_ (\(y, val) -> modifyCell x y (both val)) $ zip ys vals
 
 instance RunGrid ArrayGrid where
 	runOnUnknown a n = runST $ do -- ST Monad
+		let
+			w = Width n
+			h = Height n
 		p <- newArray
-			((Horizontal 0, Vertical 0), (Horizontal $ n-1, Vertical $ n-1))
+			(
+				(firstHorizontal, firstVertical),
+				(lastHorizontal w, lastVertical h)
+			)
 			Unknown
-		runGrid a p
+		runGrid a $ GridInfo
+			{ gridHeight = h
+			, gridWidth = w
+			, arrayPointer = p
+			}
 
