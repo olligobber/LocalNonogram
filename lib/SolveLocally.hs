@@ -9,7 +9,7 @@ import Data.Foldable (traverse_)
 import Data.Proxy (Proxy)
 import Nonogram
 	( Grid, Vertical, Horizontal
-	, Hints(rowHints, colHints), widthFromHints, heightFromHints, hintOne
+	, Hints(rowHints, colHints), widthFromHints, heightFromHints
 	)
 import SolveClass
 	( CellInfo(..), either
@@ -20,18 +20,34 @@ import SolveClass
 	, RunGrid, runOnUnknown
 	)
 
--- Given a line with partial information, get all lines with full information
-possibleLines :: [CellInfo] -> [[Bool]]
-possibleLines = traverse $ \x -> case x of
-	Unknown -> [True, False]
-	Full -> [True]
-	Empty -> [False]
+-- Given hints and a line with partial information,
+-- get all lines with full information
+possibleLines :: [Int] -> [CellInfo] -> [[Bool]]
+possibleLines [] [] = pure []
+possibleLines [] (Full:_) = fail
+possibleLines [] (_:cells) = (False:) <$> possibleLines [] cells
+possibleLines _ [] = fail
+possibleLines (hint:hints) (Full:cells) =
+	placeHere hint hints (Full:cells)
+possibleLines (hint:hints) (cell:cells) =
+	((False:) <$> possibleLines (hint:hints) cells) <>
+	placeHere hint hints (cell:cells)
+
+-- Helper for above that places a segment right here
+placeHere :: Int -> [Int] -> [CellInfo] -> [[Bool]]
+placeHere 0 [] [] = pure []
+placeHere 0 _ [] = fail
+placeHere 0 _ (Full:_) = fail
+placeHere 0 hints (_:cells) = (False:) <$> possibleLines hints cells
+placeHere _ _ (Empty:_) = fail
+placeHere _ _ [] = fail
+placeHere n hints (_:cells) = (True:) <$> placeHere (n-1) hints cells
 
 -- Given current state of a line and its hints, deduce as much as possible
--- This is done by getting every possible full info version of the line,
--- filtering those that match the hint, and combining the results
+-- This is done by getting every possible full info version of the line that
+-- matches the hint, then combining them all
 deduceLine :: MonadFail m => [Int] -> [CellInfo] -> m [CellInfo]
-deduceLine hint line = case filter ((== hint) . hintOne) $ possibleLines line of
+deduceLine hint line = case possibleLines hint line of
 	[] -> fail
 	xs -> pure $ foldl1 either $ fmap (\b -> if b then Full else Empty) <$> xs
 

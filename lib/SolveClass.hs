@@ -26,6 +26,9 @@ class Monad m => MonadFail m where
 instance MonadFail Maybe where
 	fail = Nothing
 
+instance MonadFail [] where
+	fail = []
+
 -- A class representing deductions which can be combined in two ways
 class Deduction x where
 	-- either creates a more general deduction which both inputs imply
