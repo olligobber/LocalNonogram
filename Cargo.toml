@@ -1,0 +1,10 @@
+[package]
+name = "local_nonogram"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[[bin]]
+name = "local_nonogram"
+path = "src/main.rs"
