@@ -15,7 +15,6 @@ impl Grid {
 		use Grid::*;
 		match self {
 			Going{rows} => {
-				let mut incremented: bool = false;
 				let mut no_more: bool = false;
 				for i in (0..rows.len()).rev() {
 					for j in (0..rows[i].len()).rev() {
@@ -26,12 +25,8 @@ impl Grid {
 							}
 						} else {
 							rows[i][j] = true;
-							incremented = true;
-							break;
+							return;
 						}
-					}
-					if incremented {
-						break;
 					}
 				}
 				if no_more {
