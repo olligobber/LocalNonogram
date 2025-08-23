@@ -46,33 +46,22 @@ impl Hint {
 
 	fn progress(&self, state: &Vec<Cell>) -> Vec<Cell> {
 		let size: usize = state.len();
-		let mut possibilities = Line::new(size);
+		let mut possibilities = Line::new(state);
 		let mut result: Vec<Cell> = Vec::new();
 		loop {
 			match possibilities {
-				Line::Going {ref vals} => {
-					if !self.compatible(vals) {
-						possibilities.next();
-						continue;
-					}
-					let mut compatible_with_state: bool = true;
-					for i in 0..size {
-						if !state[i].compatible(vals[i]) {
-							compatible_with_state = false;
-							break;
-						}
-					}
-					if !compatible_with_state {
+				Line::Going {ref line, changeable: _} => {
+					if !self.compatible(line) {
 						possibilities.next();
 						continue;
 					}
 					if result.is_empty() {
-						for i in vals {
+						for i in line {
 							result.push(Cell::from_bool(*i));
 						}
 					} else {
 						for i in 0..size {
-							result[i].update(vals[i]);
+							result[i].update(line[i]);
 						}
 					}
 					possibilities.next();

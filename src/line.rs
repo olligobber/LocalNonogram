@@ -1,34 +1,48 @@
+use crate::cell::Cell;
+
 pub enum Line {
 	Going {
-		vals: Vec<bool>,
+		line: Vec<bool>,
+		changeable: Vec<usize>,
 	},
 	Finished,
 }
 
 impl Line {
-	pub fn new(length: usize) -> Line {
+	pub fn new(template: &Vec<Cell>) -> Line {
+		let mut line: Vec<bool> = Vec::new();
+		let mut changeable: Vec<usize> = Vec::new();
+		for i in 0..template.len() {
+			match template[i] {
+				Cell::Empty => { line.push(false); },
+				Cell::Full => { line.push(true); },
+				Cell::Unknown => {
+					line.push(false);
+					changeable.push(i);
+				}
+			}
+		}
 		Line::Going {
-			vals: vec![false; length],
+			line: line,
+			changeable: changeable,
 		}
 	}
+
 	pub fn next(&mut self) {
 		use Line::*;
 		match self {
-			Going{vals} => {
-				let mut no_more: bool = false;
-				for i in (0..vals.len()).rev() {
-					if vals[i] {
-						vals[i] = false;
-						if i == 0 {
-							no_more = true;
-						}
+			Going{line, changeable} => {
+				if changeable.iter().all(|i| line[*i]) {
+					*self = Finished;
+					return;
+				}
+				for i in changeable {
+					if line[*i] {
+						line[*i] = false;
 					} else {
-						vals[i] = true;
+						line[*i] = true;
 						return;
 					}
-				}
-				if no_more {
-					*self = Finished;
 				}
 			},
 			Finished => {}
