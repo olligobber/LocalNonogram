@@ -216,13 +216,13 @@ fn main() {
 
 	loop {
 		match grid {
-			Grid::going { ref rows } => {
+			Grid::Going { ref rows } => {
 				let hints = Hints::new(rows);
 				let solution = hints.solve();
 				if solution == Solved { total_solved += 1; }
 				grid.next();
 			},
-			Grid::finished => { break }
+			Grid::Finished => { break }
 		}
 	}
 

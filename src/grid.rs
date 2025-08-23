@@ -1,20 +1,20 @@
 pub enum Grid {
-	going {
+	Going {
 		rows: Vec<Vec<bool>>,
 	},
-	finished,
+	Finished,
 }
 
 impl Grid {
 	pub fn new(width: usize, height: usize) -> Grid {
-		Grid::going {
+		Grid::Going {
 			rows: vec![vec![false; width]; height],
 		}
 	}
 	pub fn next(&mut self) {
 		use Grid::*;
 		match self {
-			going{rows} => {
+			Going{rows} => {
 				let mut incremented: bool = false;
 				let mut no_more: bool = false;
 				for i in (0..rows.len()).rev() {
@@ -35,10 +35,10 @@ impl Grid {
 					}
 				}
 				if no_more {
-					*self = finished;
+					*self = Finished;
 				}
 			},
-			finished => {}
+			Finished => {}
 		}
 	}
 }
