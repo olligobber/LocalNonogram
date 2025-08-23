@@ -1,5 +1,7 @@
 use std::io;
-use itertools::Itertools;
+
+mod grid;
+use grid::Grid;
 
 #[derive(PartialEq, Eq, Debug)]
 enum Solution {
@@ -209,15 +211,19 @@ fn main() {
 			width
 		};
 
-	let bools = vec![false, true];
-	let rows = vec![bools; width].into_iter().multi_cartesian_product();
-	let grids = vec![rows; height].into_iter().multi_cartesian_product();
+	let mut grid = Grid::new(width, height);
 	let mut total_solved : u64 = 0;
 
-	for grid in grids {
-		let hints = Hints::new(&grid);
-		let solution = hints.solve();
-		if solution == Solved { total_solved += 1; }
+	loop {
+		match grid {
+			Grid::going { ref rows } => {
+				let hints = Hints::new(rows);
+				let solution = hints.solve();
+				if solution == Solved { total_solved += 1; }
+				grid.next();
+			},
+			Grid::finished => { break }
+		}
 	}
 
 	println!("{total_solved}");
