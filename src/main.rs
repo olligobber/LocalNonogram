@@ -1,5 +1,8 @@
 use std::io;
 
+mod cell;
+use cell::Cell;
+
 mod grid;
 use grid::Grid;
 
@@ -14,15 +17,6 @@ enum Solution {
 }
 
 use Solution::*;
-
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
-enum Cell {
-	Unknown,
-	Full,
-	Empty,
-}
-
-use Cell::*;
 
 #[derive(Debug)]
 struct Hint (Vec<usize>);
@@ -63,11 +57,7 @@ impl Hint {
 					}
 					let mut compatible_with_state: bool = true;
 					for i in 0..size {
-						if vals[i] && state[i] == Empty {
-							compatible_with_state = false;
-							break;
-						}
-						if !vals[i] && state[i] == Full {
+						if !state[i].compatible(vals[i]) {
 							compatible_with_state = false;
 							break;
 						}
@@ -78,16 +68,11 @@ impl Hint {
 					}
 					if result.is_empty() {
 						for i in vals {
-							if *i { result.push(Full) }
-							else { result.push(Empty) }
+							result.push(Cell::from_bool(*i));
 						}
 					} else {
 						for i in 0..size {
-							if vals[i] && result[i] == Empty {
-								result[i] = Unknown;
-							} else if !vals[i] && result[i] == Full {
-								result[i] = Unknown;
-							}
+							result[i].update(vals[i]);
 						}
 					}
 					possibilities.next();
@@ -161,7 +146,7 @@ impl Hints {
 		for _ in 0 .. self.width() {
 			let mut new_line : Vec<Cell> = Vec::new();
 			for _ in 0 .. self.height() {
-				new_line.push(Unknown);
+				new_line.push(Cell::Unknown);
 			}
 			grid.push(new_line);
 		}
@@ -169,7 +154,7 @@ impl Hints {
 			let mut num_unknowns: usize = 0;
 			for i in grid.iter() {
 				for j in i {
-					if *j == Unknown { num_unknowns+= 1 };
+					if *j == Cell::Unknown { num_unknowns+= 1 };
 				}
 			}
 			for column in 0 .. self.width() {
@@ -188,7 +173,7 @@ impl Hints {
 			let mut new_unknowns: usize = 0;
 			for i in grid.iter() {
 				for j in i {
-					if *j == Unknown { new_unknowns+= 1 };
+					if *j == Cell::Unknown { new_unknowns+= 1 };
 				}
 			}
 			if new_unknowns == num_unknowns { break }
@@ -196,7 +181,7 @@ impl Hints {
 		let mut num_unknowns: usize = 0;
 		for i in grid {
 			for j in i {
-				if j == Unknown { num_unknowns+= 1 };
+				if j == Cell::Unknown { num_unknowns+= 1 };
 			}
 		}
 		if num_unknowns == 0 { Solved } else { Unsolved }
