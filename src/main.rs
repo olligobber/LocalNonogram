@@ -3,6 +3,9 @@ use std::io;
 mod grid;
 use grid::Grid;
 
+mod line;
+use line::Line;
+
 #[derive(PartialEq, Eq, Debug)]
 enum Solution {
 	Solved,
@@ -21,71 +24,78 @@ enum Cell {
 
 use Cell::*;
 
-type Size = usize;
-
 #[derive(Debug)]
-struct Hint (Vec<Size>);
+struct Hint (Vec<usize>);
 
 impl Hint {
-	fn possibilities(&self, size: Size) -> Vec<Vec<bool>> {
-		if self.0.is_empty() {
-			vec![vec![false; size.into()]]
-		} else if size == 0 {
-			vec![]
-		} else {
-			let head : Size = self.0[0];
-			let mut tail : Vec<Size> = Vec::new();
-			for i in 1..self.0.len() {
-				tail.push(self.0[i])
-			}
-			if size < head {
-				return vec![];
-			} else if size == head {
-				if tail.is_empty() {
-					return vec![vec![true; size.into()]];
-				} else {
-					return vec![];
+	fn compatible(&self, line: &Vec<bool>) -> bool {
+		let mut i: usize = 0;
+		let mut count: usize = 0;
+		for j in line {
+			if *j {
+				if i >= self.0.len() {
+					return false;
 				}
-			}
-			let mut results: Vec<Vec<bool>> = Vec::new();
-			for i in Hint(tail).possibilities(size - head - 1).iter_mut() {
-				let mut result = vec![true; head.into()];
-				result.push(false);
-				result.append(i);
-				results.push(result);
-			}
-			for i in self.possibilities(size - 1).iter_mut() {
-				let mut result = vec![false];
-				result.append(i);
-				results.push(result);
-			}
-			return results;
-		}
-	}
-	fn progress(&self, state: &Vec<Cell>) -> Vec<Cell> {
-		let size: Size = state.len();
-		let possibilities =
-			self.possibilities(size).into_iter().filter(|i| {
-				let mut compatible : bool = true;
-				for j in 0..size {
-					if i[j] && state[j] == Empty { compatible = false; break };
-					if !i[j] && state[j] == Full { compatible = false; break };
-				}
-				compatible
-			});
-		let mut result: Vec<Cell> = Vec::new();
-		for i in possibilities {
-			if result.is_empty() {
-				for j in 0..size {
-					result.push(if i[j] { Full } else { Empty });
-				}
+				count += 1;
 			} else {
-				for j in 0..size {
-					if i[j] && result[j] == Empty { result[j] = Unknown };
-					if !i[j] && result[j] == Full { result[j] = Unknown };
-				}
+				if count == 0 { continue }
+				if count != self.0[i] { return false }
+				i += 1;
+				count = 0;
 			}
 		}
+		if count == 0 && i == self.0.len() { return true }
+		if i != self.0.len() - 1 { return false }
+		if count != self.0[i] { return false }
+		return true
+	}
+
+	fn progress(&self, state: &Vec<Cell>) -> Vec<Cell> {
+		let size: usize = state.len();
+		let mut possibilities = Line::new(size);
+		let mut result: Vec<Cell> = Vec::new();
+		loop {
+			match possibilities {
+				Line::Going {ref vals} => {
+					if !self.compatible(vals) {
+						possibilities.next();
+						continue;
+					}
+					let mut compatible_with_state: bool = true;
+					for i in 0..size {
+						if vals[i] && state[i] == Empty {
+							compatible_with_state = false;
+							break;
+						}
+						if !vals[i] && state[i] == Full {
+							compatible_with_state = false;
+							break;
+						}
+					}
+					if !compatible_with_state {
+						possibilities.next();
+						continue;
+					}
+					if result.is_empty() {
+						for i in vals {
+							if *i { result.push(Full) }
+							else { result.push(Empty) }
+						}
+					} else {
+						for i in 0..size {
+							if vals[i] && result[i] == Empty {
+								result[i] = Unknown;
+							} else if !vals[i] && result[i] == Full {
+								result[i] = Unknown;
+							}
+						}
+					}
+					possibilities.next();
+				}
+				Line::Finished => { break }
+			}
+		}
+
 		if result.is_empty() {
 			panic!("Contradiction!");
 		}
@@ -103,8 +113,8 @@ impl Hints {
 	fn new(grid: &Vec<Vec<bool>>) -> Hints {
 		let mut row_hints : Vec<Hint> = Vec::new();
 		for row in grid {
-			let mut this_hint : Vec<Size> = Vec::new();
-			let mut latest_block : Size = 0;
+			let mut this_hint : Vec<usize> = Vec::new();
+			let mut latest_block : usize = 0;
 			for i in row {
 				if *i {
 					latest_block += 1;
@@ -120,8 +130,8 @@ impl Hints {
 		}
 		let mut column_hints : Vec<Hint> = Vec::new();
 		for col in 0..grid.first().unwrap().len() {
-			let mut this_hint : Vec<Size> = Vec::new();
-			let mut latest_block : Size = 0;
+			let mut this_hint : Vec<usize> = Vec::new();
+			let mut latest_block : usize = 0;
 			for i in grid {
 				if i[col] {
 					latest_block += 1;
@@ -138,11 +148,11 @@ impl Hints {
 		Hints{row_hints: row_hints, column_hints: column_hints}
 	}
 
-	fn width(&self) -> Size {
+	fn width(&self) -> usize {
 		self.column_hints.len()
 	}
 
-	fn height(&self) -> Size {
+	fn height(&self) -> usize {
 		self.row_hints.len()
 	}
 
@@ -156,7 +166,7 @@ impl Hints {
 			grid.push(new_line);
 		}
 		loop {
-			let mut num_unknowns: Size = 0;
+			let mut num_unknowns: usize = 0;
 			for i in grid.iter() {
 				for j in i {
 					if *j == Unknown { num_unknowns+= 1 };
@@ -175,7 +185,7 @@ impl Hints {
 					grid[i][row] = new_row[i];
 				}
 			}
-			let mut new_unknowns: Size = 0;
+			let mut new_unknowns: usize = 0;
 			for i in grid.iter() {
 				for j in i {
 					if *j == Unknown { new_unknowns+= 1 };
@@ -183,7 +193,7 @@ impl Hints {
 			}
 			if new_unknowns == num_unknowns { break }
 		}
-		let mut num_unknowns: Size = 0;
+		let mut num_unknowns: usize = 0;
 		for i in grid {
 			for j in i {
 				if j == Unknown { num_unknowns+= 1 };
@@ -202,11 +212,11 @@ fn main() {
 
 	let mut words = input.split_whitespace();
 
-	let width: Size = words.next().unwrap().parse::<Size>().unwrap();
+	let width: usize = words.next().unwrap().parse::<usize>().unwrap();
 
-	let height: Size =
+	let height: usize =
 		if let Some(height_str) = words.next() {
-			height_str.parse::<Size>().unwrap()
+			height_str.parse::<usize>().unwrap()
 		} else {
 			width
 		};
