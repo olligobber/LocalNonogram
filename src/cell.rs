@@ -8,12 +8,6 @@ pub enum Cell {
 use Cell::*;
 
 impl Cell {
-	pub fn compatible(self, other: bool) -> bool {
-		if other && self == Empty { return false }
-		if !other && self == Full { return false }
-		true
-	}
-
 	pub fn update(&mut self, other: bool) {
 		if other && *self == Empty { *self = Unknown }
 		if !other && *self == Full { *self = Unknown }

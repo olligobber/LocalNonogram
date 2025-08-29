@@ -6,6 +6,7 @@ use cell::Cell;
 mod grid;
 use grid::Grid;
 
+mod hint_line_iter;
 mod hint;
 use hint::Hint;
 
@@ -89,16 +90,23 @@ impl Hints {
 				}
 			}
 			for column in 0 .. self.width() {
-				grid[column] = self.column_hints[column].progress(&grid[column]);
+				match self.column_hints[column].progress(&grid[column]) {
+					None => { return Contradiction }
+					Some(new_col) => { grid[column] = new_col }
+				}
 			}
 			for row in 0 .. self.height() {
 				let mut row_state: Vec<Cell> = Vec::new();
 				for i in 0..self.width() {
 					row_state.push(grid[i][row]);
 				}
-				let new_row = self.row_hints[row].progress(&row_state);
-				for i in 0..self.width() {
-					grid[i][row] = new_row[i];
+				match self.row_hints[row].progress(&row_state) {
+					None => { return Contradiction }
+					Some(new_row) => {
+						for i in 0..self.width() {
+							grid[i][row] = new_row[i];
+						}
+					}
 				}
 			}
 			let mut new_unknowns: usize = 0;
@@ -108,6 +116,7 @@ impl Hints {
 				}
 			}
 			if new_unknowns == num_unknowns { break }
+			if new_unknowns == 0 { break }
 		}
 		let mut num_unknowns: usize = 0;
 		for i in grid {
@@ -140,16 +149,11 @@ fn main() {
 	let mut grid = Grid::new(width, height);
 	let mut total_solved : u64 = 0;
 
-	loop {
-		match grid {
-			Grid::Going { ref rows } => {
-				let hints = Hints::new(rows);
-				let solution = hints.solve();
-				if solution == Solved { total_solved += 1; }
-				grid.next();
-			},
-			Grid::Finished => { break }
-		}
+	while let Grid::Going {ref rows} = grid  {
+		let hints = Hints::new(rows);
+		let solution = hints.solve();
+		if solution == Solved { total_solved += 1; }
+		grid.next();
 	}
 
 	println!("{total_solved}");
