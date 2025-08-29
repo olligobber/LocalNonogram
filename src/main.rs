@@ -34,7 +34,7 @@ impl Hints {
 				if *i {
 					latest_block += 1;
 				} else if latest_block > 0 {
-					this_hint.push(latest_block.clone());
+					this_hint.push(latest_block);
 					latest_block = 0;
 				}
 			}
@@ -51,7 +51,7 @@ impl Hints {
 				if i[col] {
 					latest_block += 1;
 				} else if latest_block > 0 {
-					this_hint.push(latest_block.clone());
+					this_hint.push(latest_block);
 					latest_block = 0;
 				}
 			}
@@ -60,7 +60,7 @@ impl Hints {
 			}
 			column_hints.push(Hint { hint: this_hint });
 		}
-		Hints{row_hints: row_hints, column_hints: column_hints}
+		Hints{row_hints, column_hints}
 	}
 
 	fn width(&self) -> usize {
@@ -72,6 +72,7 @@ impl Hints {
 	}
 
 	fn solve(&self) -> Solution {
+		// println!("Solving grid with hints {self:?}");
 		let mut grid: Vec<Vec<Cell>> = Vec::new();
 		for _ in 0 .. self.width() {
 			let mut new_line : Vec<Cell> = Vec::new();

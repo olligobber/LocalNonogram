@@ -9,7 +9,8 @@ pub struct Hint {
 }
 
 impl Hint {
-	pub fn progress(&self, state: &Vec<Cell>) -> Vec<Cell> {
+	pub fn progress(&self, state: &[Cell]) -> Vec<Cell> {
+		// println!("Progressing with hint {self:?} and state {state:?}");
 		let size: usize = state.len();
 		let mut result: Vec<Cell> = Vec::new();
 		for line in HintLineIterator::new(state, self) {
@@ -27,11 +28,12 @@ impl Hint {
 		if result.is_empty() {
 			panic!("Contradiction!");
 		}
+		// println!("Finished line with new state {result:?}");
 		result
 	}
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct HintLineState {
 	remaining_hints: VecDeque<usize>,
 	line_so_far: VecDeque<bool>,
@@ -44,12 +46,12 @@ struct HintLineIterator {
 }
 
 impl HintLineIterator {
-	fn new(knowledge: &Vec<Cell>, hints: &Hint) -> HintLineIterator {
+	fn new(knowledge: &[Cell], hints: &Hint) -> HintLineIterator {
 		HintLineIterator {
 			possibilities: VecDeque::from([HintLineState
 				{ remaining_hints: VecDeque::from(hints.hint.clone())
 				, line_so_far: VecDeque::new()
-				, remaining_knowledge: VecDeque::from(knowledge.clone())
+				, remaining_knowledge: VecDeque::from(knowledge.to_owned())
 				, current_hint: None
 				}
 			])
@@ -65,7 +67,8 @@ impl Iterator for HintLineIterator {
 			match self.possibilities.pop_back() {
 				None => { return None }
 				Some(mut state) => {
-					match (state.current_hint, state.remaining_knowledge.pop_back()) {
+					// println!("{state:?}");
+					match (state.current_hint, state.remaining_knowledge.pop_front()) {
 						(None, None) => {
 							if state.remaining_hints.is_empty() {
 								return Some(state.line_so_far.into_iter().collect::<Vec<bool>>());

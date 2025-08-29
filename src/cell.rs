@@ -11,7 +11,7 @@ impl Cell {
 	pub fn compatible(self, other: bool) -> bool {
 		if other && self == Empty { return false }
 		if !other && self == Full { return false }
-		return true
+		true
 	}
 
 	pub fn update(&mut self, other: bool) {
