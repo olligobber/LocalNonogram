@@ -6,8 +6,8 @@ use cell::Cell;
 mod grid;
 use grid::Grid;
 
-mod line;
-use line::Line;
+mod hint;
+use hint::Hint;
 
 #[derive(PartialEq, Eq, Debug)]
 enum Solution {
@@ -17,65 +17,6 @@ enum Solution {
 }
 
 use Solution::*;
-
-#[derive(Debug)]
-struct Hint (Vec<usize>);
-
-impl Hint {
-	fn compatible(&self, line: &Vec<bool>) -> bool {
-		let mut i: usize = 0;
-		let mut count: usize = 0;
-		for j in line {
-			if *j {
-				if i >= self.0.len() {
-					return false;
-				}
-				count += 1;
-			} else {
-				if count == 0 { continue }
-				if count != self.0[i] { return false }
-				i += 1;
-				count = 0;
-			}
-		}
-		if count == 0 && i == self.0.len() { return true }
-		if i != self.0.len() - 1 { return false }
-		if count != self.0[i] { return false }
-		return true
-	}
-
-	fn progress(&self, state: &Vec<Cell>) -> Vec<Cell> {
-		let size: usize = state.len();
-		let mut possibilities = Line::new(state);
-		let mut result: Vec<Cell> = Vec::new();
-		loop {
-			match possibilities {
-				Line::Going {ref line, changeable: _} => {
-					if !self.compatible(line) {
-						possibilities.next();
-						continue;
-					}
-					if result.is_empty() {
-						for i in line {
-							result.push(Cell::from_bool(*i));
-						}
-					} else {
-						for i in 0..size {
-							result[i].update(line[i]);
-						}
-					}
-					possibilities.next();
-				}
-				Line::Finished => { break }
-			}
-		}
-
-		if result.is_empty() {
-			panic!("Contradiction!");
-		}
-		result
-	}
-}
 
 #[derive(Debug)]
 struct Hints {
@@ -100,7 +41,7 @@ impl Hints {
 			if latest_block > 0 {
 				this_hint.push(latest_block);
 			}
-			row_hints.push(Hint(this_hint));
+			row_hints.push(Hint { hint: this_hint });
 		}
 		let mut column_hints : Vec<Hint> = Vec::new();
 		for col in 0..grid.first().unwrap().len() {
@@ -117,7 +58,7 @@ impl Hints {
 			if latest_block > 0 {
 				this_hint.push(latest_block);
 			}
-			column_hints.push(Hint(this_hint));
+			column_hints.push(Hint { hint: this_hint });
 		}
 		Hints{row_hints: row_hints, column_hints: column_hints}
 	}
