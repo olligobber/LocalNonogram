@@ -1,3 +1,4 @@
+// Iterator for all grids
 pub enum Grid {
 	Going {
 		rows: Vec<Vec<bool>>,
@@ -6,11 +7,13 @@ pub enum Grid {
 }
 
 impl Grid {
+	// Start the iterator with all false
 	pub fn new(width: usize, height: usize) -> Grid {
 		Grid::Going {
 			rows: vec![vec![false; width]; height],
 		}
 	}
+	// Update the iterator using binary counting
 	pub fn next(&mut self) {
 		use Grid::*;
 		match self {

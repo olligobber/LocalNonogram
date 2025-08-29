@@ -1,15 +1,17 @@
 use crate::cell::Cell;
 use crate::cell::Cell::*;
 
+// A single state for iterating over all possible solutions to a line
 #[derive(Clone, Debug)]
 struct HintLineState<'a> {
-	remaining_hints: &'a [usize],
-	line_so_far: Vec<bool>,
-	remaining_knowledge: &'a [Cell],
-	current_hint: Option<usize>,
+	remaining_hints: &'a [usize], // hints that have not been placed yet
+	line_so_far: Vec<bool>, // the line that has been placed
+	remaining_knowledge: &'a [Cell], // cell knowledge that has not been look at yet
+	current_hint: Option<usize>, // the amount of the current hint remaining
 }
 
 impl HintLineState<'_> {
+	// Get the next hint, removing it from remaining_hints
 	fn pop_hint(&mut self) -> Option<usize> {
 		match self.remaining_hints.split_first() {
 			None => { None }
@@ -20,6 +22,7 @@ impl HintLineState<'_> {
 		}
 	}
 
+	// Get the next cell of knowledge, removing it from remaining_knowledge
 	fn pop_knowledge(&mut self) -> Option<Cell> {
 		match self.remaining_knowledge.split_first() {
 			None => { None }
@@ -31,6 +34,8 @@ impl HintLineState<'_> {
 	}
 }
 
+// An iterator over all possible solutions to a line, given its hint and current knowledge
+// A stack of possible states that have yet to be explored
 pub struct HintLineIterator<'a> {
 	possibilities: Vec<HintLineState<'a>>,
 }
@@ -53,11 +58,12 @@ impl Iterator for HintLineIterator<'_> {
 	type Item = Vec<bool>;
 
 	fn next(&mut self) -> Option<Self::Item> {
+		// We will repeatedly pop off a state and either progress or resolve it
+		// Until we run out of states, or we return a full solution
 		loop {
 			match self.possibilities.pop() {
 				None => { return None }
 				Some(mut state) => {
-					// println!("{state:?}");
 					match (state.current_hint, state.pop_knowledge()) {
 						(None, None) => {
 							if state.remaining_hints.is_empty() {

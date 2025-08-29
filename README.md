@@ -21,26 +21,16 @@ For 0x0 and 1x1 grids, any way of filling the grid will lead to unique hints, an
 ───┴─┴─┴─┴─┘
 ```
 
-This code is incredibly slow to run for large sizes, as it looks at every nxm grid, of which there are 2^(n*m), determines its hints, and attempts to apply inefficient logic to solve it. On a cheap laptop, 4x4 takes about 2 seconds, and 5x5 takes about 21 minutes. My current estimate for 6x6 is that it will take 31.9 years.
+This code is incredibly slow to run for large sizes, as it looks at every nxm grid, of which there are 2^(n*m), determines its hints, and attempts to apply inefficient logic to solve it. On a cheap laptop, 4x4 takes about 0.3 seconds, and 5x5 takes about 5 minutes. My current estimate for 6x6 is that it will take 29 hours.
 
 ## Dependencies
 
-Dependencies are kept minimal. `cabal` is used to compile haskell code. The cabal config file `SolvableNonogram.cabal` specifies versions of cabal and any libraries used.
+Dependencies are kept minimal. `cargo` is used to compile rust code. The rust config file `Cargo.toml` specifies any libraries used.
 
 ## Running
 
-Building and running the project is done using `cabal`. `cabal build` will build the project, `cabal run` will run it, and `cabal clean` will clean up the temporary build files. `cabal run` will also build the project if it is out of date. The executable takes a size from standard input, one value for a square and two for a rectangle, and then prints the count to standard output. For example, `cabal run <<< "4"` will print `51234`, and `cabal run <<< "2 5"` will print `810`.
+Building and running the project is done using `cargo`. `cargo build --release` will build the project, `cargo run --release` will run it, and `cargo clean` will clean up the temporary build files. `cargo run --release` will also build the project if it is out of date. The executable takes a size from standard input, one value for a square and two for a rectangle, and then prints the count to standard output. For example, `cargo run <<< "4"` will print `51234`, and `cargo run <<< "2 5"` will print `810`.
 
-## Haskell Source Code
+## Rust Source Code
 
-Haskell code for the executable is contained in the `app` directory, and the libraries are contained in the `lib` directory. Dependencies are managed by cabal, and can be seen in `LocalNonogram.cabal`.
-
-Haskell is used because it makes the code easier to read and write, though it is very inefficient when lots of data is stored in memory. Thus, the code must be optimised to avoid loading multiple problems at once.
-
-A list of haskell source files follows:
-* `lib/Nonogram.hs`: This contains general definitions of nonogram grids and hints. This includes basic operations for conversion, extracting data, and writing and reading to files or the terminal, as well as generating hints from lines or grids of a puzzle.
-* `lib/SolveClass.hs`: This contains general definitions useful for solving nonograms. This includes a class for deductions featuring methods for "either" and "both", classes for monads that support reading and updating the knowledge about the grid.
-* `lib/SimpleGrid.hs`: This contains a simple and inefficient implementation of the monad in `lib/SolveClass.hs` for reading and updating the knowledge about the grid. This is mainly here as a demonstration of a simple implementation, and is not used in practice due to its inefficiency.
-* `lib/ArrayGrid.hs`: This contains an array based implementation of the monad in `lib/SolveClass.hs` for reading and updating the knowledge about the grid.
-* `lib/SolveLocally.hs`: This contains the actual logic of solving the grid. It is implemented only using the classes from `lib/SolveClass.hs`, so the underlying implementation can be chosen later.
-* `app/numSolvable.hs`: This is the source for the executable. Its basic structure involves generating a list of all grids, and applying a map-reduce to figure out which are locally solvable. Thanks to lazy evaluation, the full tail of the list is only generated as needed, and the head of the list can be discarded once it has been processed, meaning very little memory is actually used.
+Haskell code for the executable and libraries is contained in the `src` directory. Dependencies are managed by cabal, and can be seen in `Cargo.toml`.
