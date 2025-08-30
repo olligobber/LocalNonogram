@@ -1,3 +1,6 @@
+use std::cell::RefCell;
+use mempool::Pool;
+
 use crate::cell::Cell;
 use crate::hint_line_iter::HintLineIterator;
 
@@ -11,10 +14,12 @@ impl Hint {
 	// Update a line given its hint and current knowledge
 	// Returns None if it gets a contradiction
 	// Loops over every possible solution, combining them into the new knowledge of that line
-	pub fn progress(&self, state: &[Cell]) -> Option<Vec<Cell>> {
+	pub fn progress(&self, state: &[Cell], mempool: &mut Pool<RefCell<Vec<bool>>>)
+		-> Option<Vec<Cell>>
+	{
 		let size: usize = state.len();
 		let mut result: Vec<Cell> = Vec::new();
-		for line in HintLineIterator::new(state, &self.hint) {
+		for line in HintLineIterator::new(state, &self.hint, mempool) {
 			if result.is_empty() {
 				for i in line {
 					result.push(Cell::from_bool(i));

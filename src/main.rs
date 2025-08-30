@@ -1,4 +1,6 @@
 use std::io;
+use std::cell::RefCell;
+use mempool::Pool;
 
 mod cell;
 use cell::Cell;
@@ -74,7 +76,7 @@ impl Hints {
 		self.row_hints.len()
 	}
 
-	fn solve(&self) -> Solution {
+	fn solve(&self, mempool: &mut Pool<RefCell<Vec<bool>>>) -> Solution {
 		// Build a grid of all unknowns
 		let mut grid: Vec<Vec<Cell>> = Vec::new();
 		for _ in 0 .. self.width() {
@@ -96,7 +98,7 @@ impl Hints {
 				}
 			}
 			for column in 0 .. self.width() {
-				match self.column_hints[column].progress(&grid[column]) {
+				match self.column_hints[column].progress(&grid[column], mempool) {
 					None => { return Contradiction }
 					Some(new_col) => { grid[column] = new_col }
 				}
@@ -106,7 +108,7 @@ impl Hints {
 				for i in 0..self.width() {
 					row_state.push(grid[i][row]);
 				}
-				match self.row_hints[row].progress(&row_state) {
+				match self.row_hints[row].progress(&row_state, mempool) {
 					None => { return Contradiction }
 					Some(new_row) => {
 						for i in 0..self.width() {
@@ -157,11 +159,15 @@ fn main() {
 	let mut grid = Grid::new(width, height);
 	let mut total_solved : u64 = 0;
 
+	// Build a mempool for the solvers
+	let mut mempool : Pool<RefCell<Vec<bool>>>
+		= Pool::new(Box::new(|| RefCell::new(Vec::new())));
+
 	// Loop over every grid, get its hints, solve it, and count how many it solved
 	// Hints with multiple grids will be attempted multiple times, but can't be solved so won't count multiple times
 	while let Grid::Going {ref rows} = grid {
 		let hints = Hints::new(rows);
-		let solution = hints.solve();
+		let solution = hints.solve(&mut mempool);
 		if solution == Contradiction { panic!("Contradiction!") }
 		if solution == Solved { total_solved += 1; }
 		grid.next();
