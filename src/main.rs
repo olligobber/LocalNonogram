@@ -4,6 +4,7 @@ use std::fs;
 use std::str::FromStr;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 mod cell;
 mod hint_line_iter;
@@ -33,6 +34,8 @@ struct Args {
 }
 
 fn main() {
+	let start_time = Instant::now();
+
 	let args = Args::parse();
 
 	let width: usize = args.width;
@@ -47,6 +50,7 @@ fn main() {
 
 	let mut total_tried : u64 = 0;
 	let mut total_solved : u64 = 0;
+	let mut saved_time = Duration::ZERO;
 
 	if let Ok(file) = fs::read_to_string(path) {
 		let mut lines = file.lines();
@@ -55,6 +59,7 @@ fn main() {
 		if width == stored_width && height == stored_height {
 			total_tried = u64::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid total tried in file");
 			total_solved = u64::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid total solved in file");
+			saved_time = Duration::from_millis(u64::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid time in file"));
 		}
 	}
 
@@ -77,7 +82,8 @@ fn main() {
 			quit.store(true, Ordering::SeqCst);
 		}
 		if quit.load(Ordering::SeqCst) {
-			fs::write(path, format!("{width}\n{height}\n{total_tried}\n{total_solved}"))
+			let total_time = (saved_time + start_time.elapsed()).as_millis();
+			fs::write(path, format!("{width}\n{height}\n{total_tried}\n{total_solved}\n{total_time}"))
 				.expect("Failed to save progress");
 			break;
 		}

@@ -59,7 +59,7 @@ The program saves its progress when it is quit and when it finishes. The file na
 * The height of the grid
 * The number of grids attempted
 * The number of grids solved
-* The total time in seconds spent solving
+* The total time in milliseconds spent solving
 If the specified width and height do not match what was saved, or the file is missing, the program will start from scratch.
 
 ## Rust Source Code
