@@ -54,6 +54,14 @@ Dependencies are kept minimal. `cargo` is used to compile rust code. The rust co
 
 Building and running the project is done using `cargo`. `cargo build --release` will build the project, `cargo run --release` will run it, and `cargo clean` will clean up the temporary build files. `cargo run --release` will also build the project if it is out of date. The executable takes a size from command line arguments, one value for a square and two for a rectangle, and then prints the count to standard output. For example, `cargo run -- 4` will print `51234`, and `cargo run -- 2 5"` will print `810`.
 
+The program saves its progress when it is quit and when it finishes. The file name can be specified using the argument `-f <file>`, and defaults to `nonogram_data`. This file contains on separate lines:
+* The width of the grid
+* The height of the grid
+* The number of grids attempted
+* The number of grids solved
+* The total time in seconds spent solving
+If the specified width and height do not match what was saved, or the file is missing, the program will start from scratch.
+
 ## Rust Source Code
 
 Rust code for the executable and libraries is contained in the `src` directory. Dependencies are managed by cargo, and can be seen in `Cargo.toml`.
