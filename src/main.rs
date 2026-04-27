@@ -1,4 +1,4 @@
-use std::io;
+use clap::Parser;
 
 mod cell;
 mod hint_line_iter;
@@ -13,24 +13,22 @@ use solution::Solution::*;
 mod hints;
 use hints::Hints;
 
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+	/// Width of the grid
+	width: usize,
+
+	/// Height of the grid, same as width if not provided
+	height: Option<usize>,
+}
+
 fn main() {
-	// Parse the input
-	let mut input = String::new();
+	let args = Args::parse();
 
-	io::stdin()
-		.read_line(&mut input)
-		.expect("Failed to read line");
+	let width: usize = args.width;
 
-	let mut words = input.split_whitespace();
-
-	let width: usize = words.next().unwrap().parse::<usize>().unwrap();
-
-	let height: usize =
-		if let Some(height_str) = words.next() {
-			height_str.parse::<usize>().unwrap()
-		} else {
-			width
-		};
+	let height: usize = args.height.unwrap_or(width);
 
 	// Build an iterator and counter for the number solved
 	let mut grid = Grid::new(width, height);

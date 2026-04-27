@@ -52,7 +52,7 @@ Dependencies are kept minimal. `cargo` is used to compile rust code. The rust co
 
 ## Running
 
-Building and running the project is done using `cargo`. `cargo build --release` will build the project, `cargo run --release` will run it, and `cargo clean` will clean up the temporary build files. `cargo run --release` will also build the project if it is out of date. The executable takes a size from standard input, one value for a square and two for a rectangle, and then prints the count to standard output. For example, `cargo run <<< "4"` will print `51234`, and `cargo run <<< "2 5"` will print `810`.
+Building and running the project is done using `cargo`. `cargo build --release` will build the project, `cargo run --release` will run it, and `cargo clean` will clean up the temporary build files. `cargo run --release` will also build the project if it is out of date. The executable takes a size from command line arguments, one value for a square and two for a rectangle, and then prints the count to standard output. For example, `cargo run -- 4` will print `51234`, and `cargo run -- 2 5"` will print `810`.
 
 ## Rust Source Code
 
