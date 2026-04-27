@@ -1,42 +1,31 @@
-// Iterator for all grids
-pub enum Grid {
-	Going {
-		rows: Vec<Vec<bool>>,
-	},
-	Finished,
+// Structure for storing grids
+pub struct Grid {
+	width: usize,
+	height: usize,
+	pub rows: Vec<Vec<bool>>,
 }
 
 impl Grid {
-	// Start the iterator with all false
+	// Initialise the data structure with all false
 	pub fn new(width: usize, height: usize) -> Grid {
-		Grid::Going {
+		Grid {
+			width,
+			height,
 			rows: vec![vec![false; width]; height],
 		}
 	}
-	// Update the iterator using binary counting
-	pub fn next(&mut self) {
-		use Grid::*;
-		match self {
-			Going{rows} => {
-				let mut no_more: bool = false;
-				for i in (0..rows.len()).rev() {
-					for j in (0..rows[i].len()).rev() {
-						if rows[i][j] {
-							rows[i][j] = false;
-							if i == 0 && j == 0 {
-								no_more = true;
-							}
-						} else {
-							rows[i][j] = true;
-							return;
-						}
-					}
-				}
-				if no_more {
-					*self = Finished;
-				}
-			},
-			Finished => {}
+
+	// Load the grid with a particular index into memory
+	// If the index is out of range, a wrapped around version will be loaded
+	// Returns true if the index was in range and false if it was out of range
+	pub fn load(&mut self, index: u64) -> bool {
+		let mut reader: u64 = index;
+		for i in 0..self.height {
+			for j in 0..self.width {
+				self.rows[i][j] = reader & 1 == 0;
+				reader >>= 1;
+			}
 		}
+		reader == 0
 	}
 }
