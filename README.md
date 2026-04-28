@@ -71,4 +71,6 @@ Rust code for the executable and libraries is contained in the `src` directory. 
 
 Thanks to Laeeque for first suggesting the line by line approach to solving as the limitation that led to the number 24976511, and for introducing the term "local" for this kind of approach.
 
+Thanks to [Paige](https://github.com/physical-memory-paige) for helping me learn Rust while I ported this project from Haskell to Rust.
+
 Thanks to [mcpower](https://github.com/mcpower/mc-local-nonogram) for finding various optimisations, such as the idea of precomputing a lookup table for making progress on a row, and the use of SIMD parallelisation.
