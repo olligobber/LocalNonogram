@@ -1,28 +1,29 @@
+use bitvec::prelude::*;
+
 use crate::line::Line;
 
 // A hint for a line, consisting a series of 1s the length of each block separated by 0s
 #[derive(Debug)]
 pub struct Hint {
 	pub length: usize,
-	pub hint: u16,
+	pub contents: BitArray<[u16; 1]>,
 }
 
 impl Hint {
 	pub fn new(line: Line) -> Hint {
-		let mut result : u16 = 0;
-		let mut data = line.contents;
-		for _ in 0..line.length {
-			if data & 1 == 1 {
-				result <<= 1;
-				result |= 1;
-			} else if result & 1 == 1 {
-				result <<= 1;
+		let mut result : BitArray<[u16; 1]> = BitArray::ZERO;
+		let mut result_pos : usize = 0;
+		let mut in_block : bool = false;
+		for i in 0..line.length {
+			if line.contents[i] {
+				result.set(result_pos, true);
+				result_pos += 1;
+				in_block = true;
+			} else if in_block {
+				result_pos += 1;
+				in_block = false;
 			}
-			data >>= 1;
 		}
-		if result & 1 == 0 {
-			result >>= 1;
-		}
-		Hint { length: line.length, hint: result }
+		Hint { length: line.length, contents: result }
 	}
 }

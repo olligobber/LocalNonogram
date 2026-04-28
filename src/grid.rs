@@ -1,3 +1,5 @@
+use bitvec::prelude::*;
+
 use crate::line::Line;
 
 // Structure for storing grids
@@ -33,24 +35,18 @@ impl Grid {
 
 	// Extract a row out of a grid
 	pub fn get_row(&self, row: usize) -> Line {
-		let mut result: u16 = 0;
-		for j in (0..self.width).rev() {
-			result <<= 1;
-			if self.rows[row][j] {
-				result |= 1;
-			}
+		let mut result: BitArray<[u16; 1]> = BitArray::ZERO;
+		for j in 0..self.width {
+			result.set(j, self.rows[row][j]);
 		}
 		Line { length: self.width, contents: result }
 	}
 
 	// Extract a column out of a grid
 	pub fn get_col(&self, col: usize) -> Line {
-		let mut result: u16 = 0;
-		for i in (0..self.height).rev() {
-			result <<= 1;
-			if self.rows[i][col] {
-				result |= 1;
-			}
+		let mut result: BitArray<[u16; 1]> = BitArray::ZERO;
+		for i in 0..self.height {
+			result.set(i, self.rows[i][col])
 		}
 		Line { length: self.height, contents: result }
 	}
@@ -58,20 +54,16 @@ impl Grid {
 	// Replace a row in a grid
 	pub fn set_row(&mut self, row: usize, data: Line) {
 		assert_eq!(self.width, data.length);
-		let mut reader = data.contents;
 		for j in 0..self.width {
-			self.rows[row][j] = reader & 1 == 1;
-			reader >>= 1;
+			self.rows[row][j] = data.contents[j];
 		}
 	}
 
 	// Replace a column in a grid
 	pub fn set_col(&mut self, col: usize, data: Line) {
 		assert_eq!(self.height, data.length);
-		let mut reader = data.contents;
 		for i in 0..self.height {
-			self.rows[i][col] = reader & 1 == 1;
-			reader >>= 1;
+			self.rows[i][col] = data.contents[i];
 		}
 	}
 }

@@ -9,6 +9,7 @@ derive = "1.0.0"
 features = "0.10.0"
 itertools = "0.14.0"
 ctrlc = "3.5"
+bitvec = "1.0.1"
 
 [[bin]]
 name = "local_nonogram"
