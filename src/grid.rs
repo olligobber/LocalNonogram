@@ -1,3 +1,5 @@
+use crate::line::Line;
+
 // Structure for storing grids
 pub struct Grid {
 	width: usize,
@@ -22,10 +24,54 @@ impl Grid {
 		let mut reader: u64 = index;
 		for i in 0..self.height {
 			for j in 0..self.width {
-				self.rows[i][j] = reader & 1 == 0;
+				self.rows[i][j] = reader & 1 == 1;
 				reader >>= 1;
 			}
 		}
 		reader == 0
+	}
+
+	// Extract a row out of a grid
+	pub fn get_row(&self, row: usize) -> Line {
+		let mut result: u16 = 0;
+		for j in (0..self.width).rev() {
+			result <<= 1;
+			if self.rows[row][j] {
+				result |= 1;
+			}
+		}
+		Line { length: self.width, contents: result }
+	}
+
+	// Extract a column out of a grid
+	pub fn get_col(&self, col: usize) -> Line {
+		let mut result: u16 = 0;
+		for i in (0..self.height).rev() {
+			result <<= 1;
+			if self.rows[i][col] {
+				result |= 1;
+			}
+		}
+		Line { length: self.height, contents: result }
+	}
+
+	// Replace a row in a grid
+	pub fn set_row(&mut self, row: usize, data: Line) {
+		assert_eq!(self.width, data.length);
+		let mut reader = data.contents;
+		for j in 0..self.width {
+			self.rows[row][j] = reader & 1 == 1;
+			reader >>= 1;
+		}
+	}
+
+	// Replace a column in a grid
+	pub fn set_col(&mut self, col: usize, data: Line) {
+		assert_eq!(self.height, data.length);
+		let mut reader = data.contents;
+		for i in 0..self.height {
+			self.rows[i][col] = reader & 1 == 1;
+			reader >>= 1;
+		}
 	}
 }

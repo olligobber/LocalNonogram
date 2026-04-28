@@ -6,18 +6,14 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-mod cell;
-mod hint_line_iter;
 mod hint;
+mod line;
 
 mod grid;
 use grid::Grid;
 
 mod solution;
 use solution::Solution::*;
-
-mod hints;
-use hints::Hints;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -44,6 +40,10 @@ fn main() {
 
 	if width * height >= 64 {
 		panic!("Solver cannot handle grids with area of 64 or more.")
+	}
+
+	if width >= 16 || height >= 16 {
+		panic!("Solver cannot handle grids with width or height 16 or more.")
 	}
 
 	let path = Path::new(&args.file);
@@ -87,9 +87,7 @@ fn main() {
 				.expect("Failed to save progress");
 			break;
 		}
-		let hints = Hints::new(&grid.rows);
-		let solution = hints.solve();
-		if solution == Contradiction { panic!("Contradiction!") }
+		// TODO new solver
 		if solution == Solved { total_solved += 1 }
 		total_tried += 1;
 	}

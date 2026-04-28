@@ -1,34 +1,28 @@
-use crate::cell::Cell;
-use crate::hint_line_iter::HintLineIterator;
+use crate::line::Line;
 
-// A hint for a line, consisting of the size of each segment in order
+// A hint for a line, consisting a series of 1s the length of each block separated by 0s
 #[derive(Debug)]
 pub struct Hint {
-	pub hint: Vec<usize>,
+	pub length: usize,
+	pub hint: u16,
 }
 
 impl Hint {
-	// Update a line given its hint and current knowledge
-	// Returns None if it gets a contradiction
-	// Loops over every possible solution, combining them into the new knowledge of that line
-	pub fn progress(&self, state: &[Cell]) -> Option<Vec<Cell>> {
-		let size: usize = state.len();
-		let mut result: Vec<Cell> = Vec::new();
-		for line in HintLineIterator::new(state, &self.hint) {
-			if result.is_empty() {
-				for i in line {
-					result.push(Cell::from_bool(i));
-				}
-			} else {
-				for i in 0..size {
-					result[i].update(line[i]);
-				}
+	pub fn new(line: Line) -> Hint {
+		let mut result : u16 = 0;
+		let mut data = line.contents;
+		for _ in 0..line.length {
+			if data & 1 == 1 {
+				result <<= 1;
+				result |= 1;
+			} else if result & 1 == 1 {
+				result <<= 1;
 			}
+			data >>= 1;
 		}
-
-		if result.is_empty() {
-			return None
+		if result & 1 == 0 {
+			result >>= 1;
 		}
-		Some(result)
+		Hint { length: line.length, hint: result }
 	}
 }

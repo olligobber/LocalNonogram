@@ -66,3 +66,9 @@ If the specified width and height do not match what was saved, or the file is mi
 ## Rust Source Code
 
 Rust code for the executable and libraries is contained in the `src` directory. Dependencies are managed by cargo, and can be seen in `Cargo.toml`.
+
+## Contributors
+
+Thanks to Laeeque for first suggesting the line by line approach to solving as the limitation that led to the number 24976511, and for introducing the term "local" for this kind of approach.
+
+Thanks to [mcpower](https://github.com/mcpower/mc-local-nonogram) for finding various optimisations, such as the idea of precomputing a lookup table for making progress on a row, and the use of SIMD parallelisation.

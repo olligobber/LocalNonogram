@@ -2,6 +2,5 @@
 #[derive(PartialEq, Eq, Debug)]
 pub enum Solution {
 	Solved,
-	Contradiction,
 	Unsolved,
 }
