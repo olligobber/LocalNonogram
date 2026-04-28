@@ -8,6 +8,7 @@ use std::time::{Duration, Instant};
 
 mod hint;
 mod line;
+mod line_solver;
 
 mod grid;
 use grid::Grid;

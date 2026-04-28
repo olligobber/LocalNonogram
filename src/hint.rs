@@ -6,12 +6,12 @@ use crate::line::Line;
 #[derive(Debug)]
 pub struct Hint {
 	pub length: usize,
-	pub contents: BitArray<[u16; 1]>,
+	pub contents: BitArray<[u16; 1], Lsb0>,
 }
 
 impl Hint {
 	pub fn new(line: Line) -> Hint {
-		let mut result : BitArray<[u16; 1]> = BitArray::ZERO;
+		let mut result : BitArray<[u16; 1], Lsb0> = BitArray::ZERO;
 		let mut result_pos : usize = 0;
 		let mut in_block : bool = false;
 		for i in 0..line.length {
