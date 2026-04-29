@@ -5,7 +5,6 @@ use crate::line::Line;
 // A hint for a line, consisting a series of 1s the length of each block separated by 0s
 #[derive(Debug)]
 pub struct Hint {
-	pub length: usize,
 	pub contents: BitArray<[u16; 1], Lsb0>,
 }
 
@@ -15,7 +14,7 @@ impl Hint {
 		let mut result_pos : usize = 0;
 		let mut in_block : bool = false;
 		for i in 0..line.length {
-			if line.contents[i] {
+			if line.contents[usize::from(i)] {
 				result.set(result_pos, true);
 				result_pos += 1;
 				in_block = true;
@@ -24,6 +23,6 @@ impl Hint {
 				in_block = false;
 			}
 		}
-		Hint { length: line.length, contents: result }
+		Hint { contents: result }
 	}
 }

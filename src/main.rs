@@ -10,20 +10,23 @@ mod hint;
 mod line;
 mod line_solver;
 
+mod grid_solver;
+use grid_solver::GridSolver;
+
 mod grid;
 use grid::Grid;
 
 mod solution;
-use solution::Solution::*;
+use solution::Solution;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
 	/// Width of the grid
-	width: usize,
+	width: u8,
 
 	/// Height of the grid, same as width if not provided
-	height: Option<usize>,
+	height: Option<u8>,
 
 	/// Location of file for saving/loading progress
 	#[arg(short, long, default_value_t = String::from("nonogram_data"))]
@@ -35,16 +38,16 @@ fn main() {
 
 	let args = Args::parse();
 
-	let width: usize = args.width;
+	let width: u8 = args.width;
 
-	let height: usize = args.height.unwrap_or(width);
-
-	if width * height >= 64 {
-		panic!("Solver cannot handle grids with area of 64 or more.")
-	}
+	let height: u8 = args.height.unwrap_or(width);
 
 	if width >= 16 || height >= 16 {
 		panic!("Solver cannot handle grids with width or height 16 or more.")
+	}
+
+	if width * height >= 64 {
+		panic!("Solver cannot handle grids with area of 64 or more.")
 	}
 
 	let path = Path::new(&args.file);
@@ -55,8 +58,8 @@ fn main() {
 
 	if let Ok(file) = fs::read_to_string(path) {
 		let mut lines = file.lines();
-		let stored_width = usize::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid width in file");
-		let stored_height = usize::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid height in file");
+		let stored_width = u8::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid width in file");
+		let stored_height = u8::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid height in file");
 		if width == stored_width && height == stored_height {
 			total_tried = u64::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid total tried in file");
 			total_solved = u64::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid total solved in file");
@@ -66,6 +69,9 @@ fn main() {
 
 	// Build storage for the grid
 	let mut grid = Grid::new(width, height);
+
+	// Build the grid solver
+	let grid_solver = GridSolver::new(width, height);
 
 	// A variable that is set to true when it's time to quit
 	let quit = Arc::new(AtomicBool::new(false));
@@ -88,8 +94,8 @@ fn main() {
 				.expect("Failed to save progress");
 			break;
 		}
-		// TODO new solver
-		if solution == Solved { total_solved += 1 }
+		let solution = grid_solver.solve(&grid);
+		if solution == Solution::Solved { total_solved += 1 }
 		total_tried += 1;
 	}
 }

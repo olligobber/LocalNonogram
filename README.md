@@ -21,7 +21,7 @@ For 0x0 and 1x1 grids, any way of filling the grid will lead to unique hints, an
 ───┴─┴─┴─┴─┘
 ```
 
-This code is incredibly slow to run for large sizes, as it looks at every nxm grid, of which there are 2^(n*m), determines its hints, and attempts to apply inefficient logic to solve it. On a cheap laptop, 4x4 takes about 0.3 seconds, and 5x5 takes about 5 minutes. My current estimate for 6x6 is that it will take 9 days.
+This code is incredibly slow to run for large sizes, as it looks at every nxm grid, of which there are 2^(n*m), and attempts to solve it. On a cheap laptop, 4x4 takes about 0.016 seconds, and 5x5 takes about 12 seconds. My current estimate for 6x6 is that it will take 7 hours, and for 7x7 it will take 6 years.
 
 ## Results
 
