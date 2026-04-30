@@ -21,21 +21,21 @@ For 0x0 and 1x1 grids, any way of filling the grid will lead to unique hints, an
 ───┴─┴─┴─┴─┘
 ```
 
-This code is incredibly slow to run for large sizes, as it looks at every nxm grid, of which there are 2^(n*m), and attempts to solve it. On a cheap laptop, 4x4 takes about 0.016 seconds, and 5x5 takes about 12 seconds. My current estimate for 6x6 is that it will take 7 hours, and for 7x7 it will take 6 years.
+This code is incredibly slow to run for large sizes, as it looks at every nxm grid, of which there are 2^(n*m), and attempts to solve it. On a cheap laptop, 5x5 takes about 12 seconds, and 6x6 takes about 12 hours. My current estimate for 7x7 is that it will take more than 12 years.
 
 ## Results
 
 The number of locally solvable nxm nonograms is documented in the table below. Since the table is symmetric, the upper triangle where n < m is omitted.
 
-|     | m=0 | 1     | 2         | 3        | 4         | 5
-|-----|-----|-------|-----------|----------|-----------|---
-| n=0 | 1   |       |           |          |           |
-| 1   | 1   | 2     |           |          |           |
-| 2   | 1   | 4     | 14        |          |           |
-| 3   | 1   | 8     | 52        | 384      |           |
-| 4   | 1   | 16    | 208       | 3116     | 51234     |
-| 5   | 1   | 32    | 810       | 24052    | 801832    | 24976511
-| 6   | 1   | 64    | 3178      | 188042   | 12560410  | 781005372
+|     | m=0 | 1     | 2         | 3        | 4         | 5         | 6
+|-----|-----|-------|-----------|----------|-----------|-----------|---
+| n=0 | 1   |       |           |          |           |           |
+| 1   | 1   | 2     |           |          |           |           |
+| 2   | 1   | 4     | 14        |          |           |           |
+| 3   | 1   | 8     | 52        | 384      |           |           |
+| 4   | 1   | 16    | 208       | 3116     | 51234     |           |
+| 5   | 1   | 32    | 810       | 24052    | 801832    | 24976511  |
+| 6   | 1   | 64    | 3178      | 188042   | 12560410  | 781005372 | 48625108931
 | 7   | 1   | 128   | 12418     | 1457710  | 195819250
 | 8   | 1   | 256   | 48448     | 11284750
 | 9   | 1   | 512   | 188994    | 87341874
@@ -74,3 +74,11 @@ Thanks to Laeeque for first suggesting the line by line approach to solving as t
 Thanks to [Paige](https://github.com/physical-memory-paige) for helping me learn Rust while I ported this project from Haskell to Rust.
 
 Thanks to [mcpower](https://github.com/mcpower/mc-local-nonogram) for finding various optimisations, such as the idea of precomputing a lookup table for making progress on a row, and the use of SIMD parallelisation.
+
+## Previous Work
+
+(Pixelogic Weekly #14)[https://weekly.pixelogic.app/p/pixelogic-weekly-14]
+
+(Bors, P.P. (Philippe), Analysis of Nonsimple Nonograms, Thesis Bachelor Informatica, LIACS, Leiden University, 2020.)[https://theses.liacs.nl/1853]
+
+(Batenburg, Kees & Kosters, Walter. (2012). On the Difficulty of Nonograms. ICGA journal. 35. 195-205. 10.3233/ICG-2012-35402.)[https://www.researchgate.net/publication/290264363_On_the_Difficulty_of_Nonograms]
