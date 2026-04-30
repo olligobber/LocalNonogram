@@ -77,8 +77,8 @@ Thanks to [mcpower](https://github.com/mcpower/mc-local-nonogram) for finding va
 
 ## Previous Work
 
-(Pixelogic Weekly #14)[https://weekly.pixelogic.app/p/pixelogic-weekly-14]
+[Pixelogic Weekly #14](https://weekly.pixelogic.app/p/pixelogic-weekly-14)
 
-(Bors, P.P. (Philippe), Analysis of Nonsimple Nonograms, Thesis Bachelor Informatica, LIACS, Leiden University, 2020.)[https://theses.liacs.nl/1853]
+[Bors, P.P. (Philippe), Analysis of Nonsimple Nonograms, Thesis Bachelor Informatica, LIACS, Leiden University, 2020.](https://theses.liacs.nl/1853)
 
-(Batenburg, Kees & Kosters, Walter. (2012). On the Difficulty of Nonograms. ICGA journal. 35. 195-205. 10.3233/ICG-2012-35402.)[https://www.researchgate.net/publication/290264363_On_the_Difficulty_of_Nonograms]
+[Batenburg, Kees & Kosters, Walter. (2012). On the Difficulty of Nonograms. ICGA journal. 35. 195-205. 10.3233/ICG-2012-35402.](https://www.researchgate.net/publication/290264363_On_the_Difficulty_of_Nonograms)
