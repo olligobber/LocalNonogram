@@ -27,20 +27,20 @@ This code is incredibly slow to run for large sizes, as it looks at every nxm gr
 
 The number of locally solvable nxm nonograms is documented in the table below. Since the table is symmetric, the upper triangle where n < m is omitted.
 
-|     | m=0 | 1     | 2         | 3          | 4          | 5           | 6
-|-----|-----|-------|-----------|------------|------------|-------------|---
-| n=0 | 1   |       |           |            |            |             |
-| 1   | 1   | 2     |           |            |            |             |
-| 2   | 1   | 4     | 14        |            |            |             |
-| 3   | 1   | 8     | 52        | 384        |            |             |
-| 4   | 1   | 16    | 208       | 3116       | 51234      |             |
-| 5   | 1   | 32    | 810       | 24052      | 801832     | 24976511    |
-| 6   | 1   | 64    | 3178      | 188042     | 12560410   | 781005372   | 48625108931
-| 7   | 1   | 128   | 12418     | 1457710    | 195819250  | 24259979981
-| 8   | 1   | 256   | 48448     | 11284750   | 3044432804
-| 9   | 1   | 512   | 188994    | 87341874
-| 10  | 1   | 1024  | 736786    | 675453640
-| 11  | 1   | 2048  | 2872076   | 5223558224
+|     | m=0 | 1     | 2       | 3        | 4         | 5         | 6
+|-----|-----|-------|---------|----------|-----------|-----------|---
+| n=0 | 1   |       |         |          |           |           |
+| 1   | 1   | 2     |         |          |           |           |
+| 2   | 1   | 4     | 14      |          |           |           |
+| 3   | 1   | 8     | 52      | 384      |           |           |
+| 4   | 1   | 16    | 208     | 3116     | 51234     |           |
+| 5   | 1   | 32    | 810     | 24052    | 801832    | 24976511  |
+| 6   | 1   | 64    | 3178    | 188042   | 12560410  | 781005372 | 48625108931
+| 7   | 1   | 128   | 12418   | 1457710  | 195819250 | 24259979981
+| 8   | 1   | 256   | 48448   | 11284750 | 3044432804
+| 9   | 1   | 512   | 188994  | 87341874 | 47338392112
+| 10  | 1   | 1024  | 736786  | 675453640
+| 11  | 1   | 2048  | 2872076 | 5223558224
 | 12  | 1   | 4096  | 11194600
 | 13  | 1   | 8192  | 43631762
 | 14  | 1   | 16384 | 170054426
@@ -77,6 +77,8 @@ Thanks to [Paige](https://github.com/physical-memory-paige) for helping me learn
 Thanks to [mcpower](https://github.com/mcpower/mc-local-nonogram) for finding various optimisations, such as the idea of precomputing a lookup table for making progress on a row, and the use of SIMD parallelisation.
 
 ## Previous Work
+
+[Pixelogic Weekly #8](https://weekly.pixelogic.app/p/pixelogic-weekly-8)
 
 [Pixelogic Weekly #14](https://weekly.pixelogic.app/p/pixelogic-weekly-14)
 
