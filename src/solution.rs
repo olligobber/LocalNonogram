@@ -9,6 +9,8 @@ pub struct Solution {
 	cols: Vec<Vec<bool>>,
 	symmetries: Vec<u64>,
 	pub num_symmetries: u8,
+	row_sols: Vec<Line>,
+	col_sols: Vec<Line>,
 }
 
 impl Solution {
@@ -20,6 +22,8 @@ impl Solution {
 			cols: vec![ vec![ false; usize::from(height) ]; usize::from(width) ],
 			symmetries: vec![ 0; if width == height { 8 } else { 4 } ],
 			num_symmetries: 1,
+			row_sols: vec![ Line::blank(width); usize::from(height) ],
+			col_sols: vec![ Line::blank(height); usize::from(width) ],
 		}
 	}
 
@@ -119,15 +123,13 @@ impl Solution {
 		self.symmetries[0]
 	}
 
-	pub fn sols(&self) -> (Vec<Line>, Vec<Line>) {
-		let mut row_sols: Vec<Line> = vec![ Line::blank(self.width); usize::from(self.height) ];
-		let mut col_sols: Vec<Line> = vec![ Line::blank(self.height); usize::from(self.width) ];
+	pub fn sols(&mut self) -> (&Vec<Line>, &Vec<Line>) {
 		for x in 0..self.width {
 			for y in 0..self.height {
-				row_sols[usize::from(y)].set(x, self.cols[usize::from(x)][usize::from(y)]);
-				col_sols[usize::from(x)].set(y, self.cols[usize::from(x)][usize::from(y)]);
+				self.row_sols[usize::from(y)].set(x, self.cols[usize::from(x)][usize::from(y)]);
+				self.col_sols[usize::from(x)].set(y, self.cols[usize::from(x)][usize::from(y)]);
 			}
 		}
-		(row_sols, col_sols)
+		(&self.row_sols, &self.col_sols)
 	}
 }

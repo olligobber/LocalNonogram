@@ -23,7 +23,7 @@ impl GridSolver {
 	}
 
 	// Determine if a grid can be sovled with local logic
-	pub fn solve(&self, solution: &Solution, knowledge: &mut Knowledge) -> bool {
+	pub fn solve(&self, solution: &mut Solution, knowledge: &mut Knowledge) -> bool {
 		assert_eq!(self.width, solution.width);
 		assert_eq!(self.height, solution.height);
 
