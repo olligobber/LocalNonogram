@@ -24,16 +24,20 @@ impl GridSolver {
 	}
 
 	// Determine if a grid can be sovled with local logic
-	pub fn solve(&self, solution: &Solution) -> bool {
+	pub fn solve(&self, solution: &Solution, knowledge: &mut Knowledge) -> bool {
 		assert_eq!(self.width, solution.width);
 		assert_eq!(self.height, solution.height);
+
 		let row_solver = &self.row_solver;
 		let col_solver = self.col_solver.as_ref().unwrap_or(row_solver);
 		let row_sols: Vec<Line> = (0..self.height).map(|j| solution.get_row(j)).collect();
 		let col_sols: Vec<Line> = (0..self.width).map(|i| solution.get_col(i)).collect();
-		let mut knowledge = Knowledge::new(self.width, self.height);
+
+		knowledge.reset();
+
 		loop {
 			let old_unknowns = knowledge.count_false();
+
 			for j in 0..self.height {
 				let old_row_knowledge = knowledge.get_row(j);
 				let row_sol = &row_sols[usize::from(j)];
@@ -46,6 +50,7 @@ impl GridSolver {
 				let new_col_knowledge = col_solver.progress(col_sol, &old_col_knowledge);
 				knowledge.set_col(i, new_col_knowledge);
 			}
+
 			let new_unknowns = knowledge.count_false();
 			if new_unknowns == 0 {
 				return true;

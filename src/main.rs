@@ -9,7 +9,9 @@ use std::time::{Duration, Instant};
 mod hint;
 mod line;
 mod line_solver;
+
 mod knowledge;
+use knowledge::Knowledge;
 
 mod grid_solver;
 use grid_solver::GridSolver;
@@ -71,6 +73,9 @@ fn main() {
 	// Build the grid solver
 	let grid_solver = GridSolver::new(width, height);
 
+	// Build the knowledge store
+	let mut knowledge_store = Knowledge::new(width, height);
+
 	// A variable that is set to true when it's time to quit
 	let quit = Arc::new(AtomicBool::new(false));
 	let q = quit.clone();
@@ -98,7 +103,7 @@ fn main() {
 
 		// Check if a rotation or reflection has already been solved
 		if solution.symmetry_repr() == total_tried {
-			let solvable = grid_solver.solve(&solution);
+			let solvable = grid_solver.solve(&solution, &mut knowledge_store);
 			if solvable { total_solved += u64::from(solution.num_symmetries()) }
 		}
 

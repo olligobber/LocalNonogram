@@ -19,6 +19,15 @@ impl Knowledge {
 		}
 	}
 
+	// Reset knowledge to false
+	pub fn reset(&mut self) {
+		for i in 0..usize::from(self.height) {
+			for j in 0..usize::from(self.width) {
+				self.rows[i][j] = false;
+			}
+		}
+	}
+
 	// Extract a row out of a grid
 	pub fn get_row(&self, row: u8) -> Line {
 		let mut result: BitArray<[u16; 1], Lsb0> = BitArray::ZERO;
