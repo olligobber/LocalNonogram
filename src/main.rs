@@ -104,8 +104,8 @@ fn main() {
 	// Loop over every solution, get its hints, solve it, and count how many it solved
 	// Hints with multiple solutions will be attempted multiple times, but can't be solved so won't count multiple times
 	loop {
-		// Load the grid, and exit if we've solved them all
-		if !solution.load(total_tried) {
+		// Exit if we've solved them all
+		if total_tried >= u64::pow(2, u32::from(width) * u32::from(height)) {
 			println!("{total_solved}");
 			quit.store(true, Ordering::SeqCst);
 		}
@@ -118,10 +118,13 @@ fn main() {
 			break;
 		}
 
+		// Load the grid
+		solution.load(total_tried);
+
 		// Check if a rotation or reflection has already been solved
 		if solution.symmetry_repr() == total_tried {
 			let solvable = grid_solver.solve(&solution, &mut knowledge_store);
-			if solvable { total_solved += u64::from(solution.num_symmetries()) }
+			if solvable { total_solved += u64::from(solution.num_symmetries) }
 		}
 
 		// Move to the next grid

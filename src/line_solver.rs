@@ -15,17 +15,19 @@ impl LineSolver {
 
 		let mut hint_collector : Vec<Vec<u16>> = vec![vec![]; usize::from(num_lines)];
 
+		let mut line = Line::blank(length);
+
 		for line_index in 0..num_lines {
-			let line = Line::load(length, line_index);
-			let hint = Hint::new(line);
+			line.load(line_index);
+			let hint = Hint::new(&line);
 			let hint_index = hint.contents.into_inner()[0];
 			hint_collector[usize::from(hint_index)].push(line_index);
 		}
 
 		for line_index in 0..num_lines {
 			for knowledge in 0..num_lines {
-				let line = Line::load(length, line_index);
-				let hint = Hint::new(line);
+				line.load(line_index);
+				let hint = Hint::new(&line);
 				let hint_index = hint.contents.into_inner()[0];
 				let mut new_knowledge: u16 = num_lines - 1;
 				// For each solution that matches the hint
@@ -50,10 +52,10 @@ impl LineSolver {
 	pub fn progress(&self, solution: &Line, knowledge: &Line) -> Line {
 		assert_eq!(self.length, solution.length);
 		assert_eq!(self.length, knowledge.length);
-		let solution_index = solution.contents.into_inner()[0];
-		let knowledge_index = knowledge.contents.into_inner()[0];
+		let solution_index = solution.index();
+		let knowledge_index = knowledge.index();
 		let cache_index = u32::from(solution_index) << self.length | u32::from(knowledge_index);
 		let result_index = self.cache[usize::try_from(cache_index).unwrap()];
-		Line::load(self.length, result_index)
+		Line::from(self.length, result_index)
 	}
 }

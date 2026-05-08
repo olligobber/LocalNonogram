@@ -1,7 +1,6 @@
 use crate::line_solver::LineSolver;
 use crate::solution::Solution;
 use crate::knowledge::Knowledge;
-use crate::line::Line;
 
 #[derive(Debug)]
 pub struct GridSolver {
@@ -30,8 +29,6 @@ impl GridSolver {
 
 		let row_solver = &self.row_solver;
 		let col_solver = self.col_solver.as_ref().unwrap_or(row_solver);
-		let row_sols: Vec<Line> = (0..self.height).map(|j| solution.get_row(j)).collect();
-		let col_sols: Vec<Line> = (0..self.width).map(|i| solution.get_col(i)).collect();
 
 		knowledge.reset();
 
@@ -40,13 +37,13 @@ impl GridSolver {
 
 			for j in 0..self.height {
 				let old_row_knowledge = knowledge.get_row(j);
-				let row_sol = &row_sols[usize::from(j)];
+				let row_sol = &solution.row_sols[usize::from(j)];
 				let new_row_knowledge = row_solver.progress(row_sol, &old_row_knowledge);
 				knowledge.set_row(j, new_row_knowledge);
 			}
 			for i in 0..self.width {
 				let old_col_knowledge = knowledge.get_col(i);
-				let col_sol = &col_sols[usize::from(i)];
+				let col_sol = &solution.col_sols[usize::from(i)];
 				let new_col_knowledge = col_solver.progress(col_sol, &old_col_knowledge);
 				knowledge.set_col(i, new_col_knowledge);
 			}
