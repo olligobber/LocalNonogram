@@ -1,6 +1,6 @@
 use crate::line_solver::LineSolver;
-use crate::grid::Grid;
 use crate::solution::Solution;
+use crate::knowledge::Knowledge;
 use crate::line::Line;
 
 #[derive(Debug)]
@@ -23,14 +23,15 @@ impl GridSolver {
 		GridSolver { width, height, row_solver, col_solver }
 	}
 
-	pub fn solve(&self, grid: &Grid) -> Solution {
-		assert_eq!(self.width, grid.width);
-		assert_eq!(self.height, grid.height);
+	// Determine if a grid can be sovled with local logic
+	pub fn solve(&self, solution: &Solution) -> bool {
+		assert_eq!(self.width, solution.width);
+		assert_eq!(self.height, solution.height);
 		let row_solver = &self.row_solver;
 		let col_solver = self.col_solver.as_ref().unwrap_or(row_solver);
-		let row_sols: Vec<Line> = (0..self.height).map(|j| grid.get_row(j)).collect();
-		let col_sols: Vec<Line> = (0..self.width).map(|i| grid.get_col(i)).collect();
-		let mut knowledge = Grid::new(self.width, self.height);
+		let row_sols: Vec<Line> = (0..self.height).map(|j| solution.get_row(j)).collect();
+		let col_sols: Vec<Line> = (0..self.width).map(|i| solution.get_col(i)).collect();
+		let mut knowledge = Knowledge::new(self.width, self.height);
 		loop {
 			let old_unknowns = knowledge.count_false();
 			for j in 0..self.height {
@@ -47,10 +48,10 @@ impl GridSolver {
 			}
 			let new_unknowns = knowledge.count_false();
 			if new_unknowns == 0 {
-				return Solution::Solved;
+				return true;
 			}
 			if new_unknowns == old_unknowns {
-				return Solution::Unsolved;
+				return false;
 			}
 		}
 	}

@@ -9,12 +9,10 @@ use std::time::{Duration, Instant};
 mod hint;
 mod line;
 mod line_solver;
+mod knowledge;
 
 mod grid_solver;
 use grid_solver::GridSolver;
-
-mod grid;
-use grid::Grid;
 
 mod solution;
 use solution::Solution;
@@ -67,8 +65,8 @@ fn main() {
 		}
 	}
 
-	// Build storage for the grid
-	let mut grid = Grid::new(width, height);
+	// Build storage for the solutions
+	let mut solution = Solution::new(width, height);
 
 	// Build the grid solver
 	let grid_solver = GridSolver::new(width, height);
@@ -81,11 +79,11 @@ fn main() {
 		q.store(true, Ordering::SeqCst);
 	}).expect("Error setting Ctrl-C handler");
 
-	// Loop over every grid, get its hints, solve it, and count how many it solved
-	// Hints with multiple grids will be attempted multiple times, but can't be solved so won't count multiple times
+	// Loop over every solution, get its hints, solve it, and count how many it solved
+	// Hints with multiple solutions will be attempted multiple times, but can't be solved so won't count multiple times
 	loop {
 		// Load the grid, and exit if we've solved them all
-		if !grid.load(total_tried) {
+		if !solution.load(total_tried) {
 			println!("{total_solved}");
 			quit.store(true, Ordering::SeqCst);
 		}
@@ -99,9 +97,9 @@ fn main() {
 		}
 
 		// Check if a rotation or reflection has already been solved
-		if grid.symmetry_repr() == total_tried {
-			let solution = grid_solver.solve(&grid);
-			if solution == Solution::Solved { total_solved += u64::from(grid.num_symmetries()) }
+		if solution.symmetry_repr() == total_tried {
+			let solvable = grid_solver.solve(&solution);
+			if solvable { total_solved += u64::from(solution.num_symmetries()) }
 		}
 
 		// Move to the next grid
