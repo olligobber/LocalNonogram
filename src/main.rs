@@ -84,18 +84,27 @@ fn main() {
 	// Loop over every grid, get its hints, solve it, and count how many it solved
 	// Hints with multiple grids will be attempted multiple times, but can't be solved so won't count multiple times
 	loop {
+		// Load the grid, and exit if we've solved them all
 		if !grid.load(total_tried) {
 			println!("{total_solved}");
 			quit.store(true, Ordering::SeqCst);
 		}
+
+		// Save and quit if we're finished or ctrl+c pressed
 		if quit.load(Ordering::SeqCst) {
 			let total_time = (saved_time + start_time.elapsed()).as_millis();
 			fs::write(path, format!("{width}\n{height}\n{total_tried}\n{total_solved}\n{total_time}"))
 				.expect("Failed to save progress");
 			break;
 		}
-		let solution = grid_solver.solve(&grid);
-		if solution == Solution::Solved { total_solved += 1 }
+
+		// Check if a rotation or reflection has already been solved
+		if grid.symmetry_repr() == total_tried {
+			let solution = grid_solver.solve(&grid);
+			if solution == Solution::Solved { total_solved += u64::from(grid.num_symmetries()) }
+		}
+
+		// Move to the next grid
 		total_tried += 1;
 	}
 }

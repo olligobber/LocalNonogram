@@ -1,4 +1,5 @@
 use bitvec::prelude::*;
+use itertools::Itertools;
 
 use crate::line::Line;
 
@@ -31,6 +32,108 @@ impl Grid {
 			}
 		}
 		reader == 0
+	}
+
+	// Get the index of the current grid
+	pub fn index(&self) -> u64 {
+		let mut result: u64 = 0;
+		for i in (0..usize::from(self.height)).rev() {
+			for j in (0..usize::from(self.width)).rev() {
+				result <<= 1;
+				if self.rows[i][j] { result |= 1 };
+			}
+		}
+		result
+	}
+
+	// Get the list of indices of all rotations and reflections of the current grid
+	pub fn symmetries(&self) -> Vec<u64> {
+		let mut result = vec![self.index()];
+
+		// Reflect horizontally
+		let mut hor: u64 = 0;
+		for i in 0..usize::from(self.height) {
+			for j in (0..usize::from(self.width)).rev() {
+				hor <<= 1;
+				if self.rows[i][j] { hor |= 1 };
+			}
+		}
+		result.push(hor);
+
+		// Reflect vertically
+		let mut vert: u64 = 0;
+		for i in (0..usize::from(self.height)).rev() {
+			for j in 0..usize::from(self.width) {
+				vert <<= 1;
+				if self.rows[i][j] { vert |= 1 };
+			}
+		}
+		result.push(vert);
+
+		// Rotate half a turn
+		let mut half: u64 = 0;
+		for i in 0..usize::from(self.height) {
+			for j in 0..usize::from(self.width) {
+				half <<= 1;
+				if self.rows[i][j] { half |= 1 };
+			}
+		}
+		result.push(half);
+
+		// Transformations that only work for square grids
+		if self.height == self.width {
+			// Ascending diagonal reflection
+			let mut asc: u64 = 0;
+			for j in (0..usize::from(self.width)).rev() {
+				for i in (0..usize::from(self.height)).rev() {
+					asc <<= 1;
+					if self.rows[i][j] { asc |= 1 };
+				}
+			}
+			result.push(asc);
+
+			// Descending diagonal reflection
+			let mut desc: u64 = 0;
+			for j in 0..usize::from(self.width) {
+				for i in 0..usize::from(self.height) {
+					desc <<= 1;
+					if self.rows[i][j] { desc |= 1 };
+				}
+			}
+			result.push(desc);
+
+			// Clockwise rotation
+			let mut clock: u64 = 0;
+			for j in (0..usize::from(self.width)).rev() {
+				for i in 0..usize::from(self.height) {
+					clock <<= 1;
+					if self.rows[i][j] { clock |= 1 };
+				}
+			}
+			result.push(clock);
+
+			// Anticlockwise rotation
+			let mut anti: u64 = 0;
+			for j in 0..usize::from(self.width) {
+				for i in (0..usize::from(self.height)).rev() {
+					anti <<= 1;
+					if self.rows[i][j] { anti |= 1 };
+				}
+			}
+			result.push(anti);
+		}
+
+		result
+	}
+
+	// Get the number of distinct symmetries of a grid
+	pub fn num_symmetries(&self) -> u8 {
+		u8::try_from(self.symmetries().iter().unique().count()).unwrap()
+	}
+
+	// Get a representative of the symmetries of a grid
+	pub fn symmetry_repr(&self) -> u64 {
+		*self.symmetries().iter().min().unwrap()
 	}
 
 	// Extract a row out of a grid
