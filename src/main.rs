@@ -31,6 +31,10 @@ struct Args {
 	/// Location of file for saving/loading progress
 	#[arg(short, long, default_value_t = String::from("nonogram_data"))]
 	file: String,
+
+	/// Option to ignore saved data and restart computation from scratch
+	#[arg(short, long)]
+	clean: bool,
 }
 
 fn main() {
@@ -56,16 +60,29 @@ fn main() {
 	let mut total_solved : u64 = 0;
 	let mut saved_time = Duration::ZERO;
 
-	if let Ok(file) = fs::read_to_string(path) {
+	if !&args.clean && let Ok(file) = fs::read_to_string(path) {
 		let mut lines = file.lines();
-		let stored_width = u8::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid width in file");
-		let stored_height = u8::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid height in file");
+		let stored_width = u8::from_str(
+			lines.next().expect("Not enough lines in file")
+		).expect("Invalid width in file");
+		let stored_height = u8::from_str(
+			lines.next().expect("Not enough lines in file")
+		).expect("Invalid height in file");
 		if width == stored_width && height == stored_height {
-			total_tried = u64::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid total tried in file");
-			total_solved = u64::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid total solved in file");
-			saved_time = Duration::from_millis(u64::from_str(lines.next().expect("Not enough lines in file")).expect("Invalid time in file"));
+			total_tried = u64::from_str(
+				lines.next().expect("Not enough lines in file")
+			).expect("Invalid total tried in file");
+			total_solved = u64::from_str(
+				lines.next().expect("Not enough lines in file")
+			).expect("Invalid total solved in file");
+			saved_time = Duration::from_millis(
+				u64::from_str(
+					lines.next().expect("Not enough lines in file")
+				).expect("Invalid time in file")
+			);
 		}
 	}
+
 
 	// Build storage for the solutions
 	let mut solution = Solution::new(width, height);
