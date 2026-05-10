@@ -3,6 +3,7 @@ use itertools::Itertools;
 use crate::line::Line;
 
 // Structure for storing the solution to a nonogram
+#[derive(Debug)]
 pub struct Solution {
 	pub width: u8,
 	pub height: u8,
@@ -29,14 +30,22 @@ impl Solution {
 
 	// Load the grid with a particular index into memory
 	pub fn load(&mut self, index: u64) {
-		self.symmetries[0] = index;
-
 		let mut loader = index;
 
 		for x in 0..usize::from(self.width) {
 			for y in 0..usize::from(self.height) {
 				self.cols[x][y] = loader & 1 == 1;
-				loader <<= 1;
+				loader >>= 1;
+			}
+		}
+
+		self.symmetries[0] = 0;
+		for x in 0..usize::from(self.width) {
+			for y in 0..usize::from(self.height) {
+				self.symmetries[0] <<= 1;
+				if self.cols[x][y] {
+					self.symmetries[0] |= 1;
+				}
 			}
 		}
 

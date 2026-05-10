@@ -124,6 +124,7 @@ fn main() {
 		// Check if a rotation or reflection has already been solved
 		if solution.symmetry_repr() == total_tried {
 			let solvable = grid_solver.solve(&mut solution, &mut knowledge_store);
+
 			if solvable { total_solved += u64::from(solution.num_symmetries) }
 		}
 
