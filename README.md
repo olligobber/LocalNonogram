@@ -6,20 +6,7 @@ Local logic involves keeping track of deductions about each cell individually, a
 
 For 0x0 and 1x1 grids, any way of filling the grid will lead to unique hints, and will be locally solvable. For 2x2 and 3x3 grids, there are some hints that have multiple solutions, and thus cannot be solved by any system looking for a unique solution. All 2x2 and 3x3 nonograms with hints that lead to a unique solution are known to be locally solvable. It is only when we get to 4x4 grids that things become interesting, as there are hints that have a unique solution, but local logic is insufficient to find it. For example, the following hint has a unique solution, but local logic can only deduce what a few cells are before no more progress can be made:
 
-```
-   │1│ │ │ │
-   │ │ │ │ │
-   │1│1│1│3│
-───┼─┼─┼─┼─┤
-1 1│ │ │ │ │
-───┼─┼─┼─┼─┤
-  1│ │ │ │ │
-───┼─┼─┼─┼─┤
-1 1│ │ │ │ │
-───┼─┼─┼─┼─┤
-  2│ │ │ │ │
-───┴─┴─┴─┴─┘
-```
+![A nonogram with column hints 1 1, 1, 1, 3 and row hints of 1 1, 1, 1 1, 2.](./Example.svg)
 
 This code is incredibly slow to run for large sizes, as it looks at every nxm grid, of which there are 2^(n*m), and attempts to solve it. On a cheap laptop, 5x5 takes about 12 seconds, and 6x6 takes about 12 hours. My current estimate for 7x7 is that it will take more than 12 years.
 
